@@ -1,0 +1,450 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FDA98A18193F891700954859 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA98A17193F891700954859 /* AppDelegate.swift */; };
+		FDA98A1A193F891700954859 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA98A19193F891700954859 /* ViewController.swift */; };
+		FDA98A1D193F891700954859 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FDA98A1B193F891700954859 /* Main.storyboard */; };
+		FDA98A1F193F891700954859 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FDA98A1E193F891700954859 /* Images.xcassets */; };
+		FDA98A2B193F891700954859 /* facebook_loginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA98A2A193F891700954859 /* facebook_loginTests.swift */; };
+		FDA98A36193F892800954859 /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA98A35193F892800954859 /* FacebookSDK.framework */; };
+		FDA98A3D193F8C8800954859 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FDA98A3C193F8C8800954859 /* Info.plist */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FDA98A25193F891700954859 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FDA98A0A193F891700954859 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FDA98A11193F891700954859;
+			remoteInfo = "facebook-login";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		FDA98A12193F891700954859 /* facebook-login.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "facebook-login.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDA98A16193F891700954859 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FDA98A17193F891700954859 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		FDA98A19193F891700954859 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		FDA98A1C193F891700954859 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		FDA98A1E193F891700954859 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		FDA98A24193F891700954859 /* facebook-loginTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "facebook-loginTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDA98A29193F891700954859 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FDA98A2A193F891700954859 /* facebook_loginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = facebook_loginTests.swift; sourceTree = "<group>"; };
+		FDA98A35193F892800954859 /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../../../Documents/FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
+		FDA98A39193F897D00954859 /* Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Swift.h; sourceTree = "<group>"; };
+		FDA98A3C193F8C8800954859 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FDA98A0F193F891700954859 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDA98A36193F892800954859 /* FacebookSDK.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDA98A21193F891700954859 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FDA98A09193F891700954859 = {
+			isa = PBXGroup;
+			children = (
+				FDA98A38193F894C00954859 /* Supporting Files */,
+				FDA98A34193F892100954859 /* Frameworks */,
+				FDA98A14193F891700954859 /* facebook-login */,
+				FDA98A27193F891700954859 /* facebook-loginTests */,
+				FDA98A13193F891700954859 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FDA98A13193F891700954859 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FDA98A12193F891700954859 /* facebook-login.app */,
+				FDA98A24193F891700954859 /* facebook-loginTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FDA98A14193F891700954859 /* facebook-login */ = {
+			isa = PBXGroup;
+			children = (
+				FDA98A17193F891700954859 /* AppDelegate.swift */,
+				FDA98A19193F891700954859 /* ViewController.swift */,
+				FDA98A1B193F891700954859 /* Main.storyboard */,
+				FDA98A1E193F891700954859 /* Images.xcassets */,
+				FDA98A15193F891700954859 /* Supporting Files */,
+			);
+			path = "facebook-login";
+			sourceTree = "<group>";
+		};
+		FDA98A15193F891700954859 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				FDA98A16193F891700954859 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FDA98A27193F891700954859 /* facebook-loginTests */ = {
+			isa = PBXGroup;
+			children = (
+				FDA98A2A193F891700954859 /* facebook_loginTests.swift */,
+				FDA98A28193F891700954859 /* Supporting Files */,
+			);
+			path = "facebook-loginTests";
+			sourceTree = "<group>";
+		};
+		FDA98A28193F891700954859 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				FDA98A29193F891700954859 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		FDA98A34193F892100954859 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FDA98A35193F892800954859 /* FacebookSDK.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FDA98A38193F894C00954859 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				FDA98A39193F897D00954859 /* Swift.h */,
+				FDA98A3C193F8C8800954859 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FDA98A11193F891700954859 /* facebook-login */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FDA98A2E193F891700954859 /* Build configuration list for PBXNativeTarget "facebook-login" */;
+			buildPhases = (
+				FDA98A0E193F891700954859 /* Sources */,
+				FDA98A0F193F891700954859 /* Frameworks */,
+				FDA98A10193F891700954859 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "facebook-login";
+			productName = "facebook-login";
+			productReference = FDA98A12193F891700954859 /* facebook-login.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FDA98A23193F891700954859 /* facebook-loginTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FDA98A31193F891700954859 /* Build configuration list for PBXNativeTarget "facebook-loginTests" */;
+			buildPhases = (
+				FDA98A20193F891700954859 /* Sources */,
+				FDA98A21193F891700954859 /* Frameworks */,
+				FDA98A22193F891700954859 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FDA98A26193F891700954859 /* PBXTargetDependency */,
+			);
+			name = "facebook-loginTests";
+			productName = "facebook-loginTests";
+			productReference = FDA98A24193F891700954859 /* facebook-loginTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FDA98A0A193F891700954859 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0600;
+				ORGANIZATIONNAME = "Gareth Paul Jones";
+				TargetAttributes = {
+					FDA98A11193F891700954859 = {
+						CreatedOnToolsVersion = 6.0;
+					};
+					FDA98A23193F891700954859 = {
+						CreatedOnToolsVersion = 6.0;
+						TestTargetID = FDA98A11193F891700954859;
+					};
+				};
+			};
+			buildConfigurationList = FDA98A0D193F891700954859 /* Build configuration list for PBXProject "facebook-login" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FDA98A09193F891700954859;
+			productRefGroup = FDA98A13193F891700954859 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FDA98A11193F891700954859 /* facebook-login */,
+				FDA98A23193F891700954859 /* facebook-loginTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FDA98A10193F891700954859 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDA98A1D193F891700954859 /* Main.storyboard in Resources */,
+				FDA98A1F193F891700954859 /* Images.xcassets in Resources */,
+				FDA98A3D193F8C8800954859 /* Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDA98A22193F891700954859 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FDA98A0E193F891700954859 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDA98A1A193F891700954859 /* ViewController.swift in Sources */,
+				FDA98A18193F891700954859 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDA98A20193F891700954859 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDA98A2B193F891700954859 /* facebook_loginTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FDA98A26193F891700954859 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FDA98A11193F891700954859 /* facebook-login */;
+			targetProxy = FDA98A25193F891700954859 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		FDA98A1B193F891700954859 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FDA98A1C193F891700954859 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		FDA98A2C193F891700954859 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				METAL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FDA98A2D193F891700954859 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				METAL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FDA98A2F193F891700954859 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/gjones/Documents/FacebookSDK,
+				);
+				INFOPLIST_FILE = "facebook-login/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = Swift.h;
+			};
+			name = Debug;
+		};
+		FDA98A30193F891700954859 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/gjones/Documents/FacebookSDK,
+				);
+				INFOPLIST_FILE = "facebook-login/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = Swift.h;
+			};
+			name = Release;
+		};
+		FDA98A32193F891700954859 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/facebook-login.app/facebook-login";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "facebook-loginTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				METAL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+			};
+			name = Debug;
+		};
+		FDA98A33193F891700954859 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/facebook-login.app/facebook-login";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "facebook-loginTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				METAL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FDA98A0D193F891700954859 /* Build configuration list for PBXProject "facebook-login" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDA98A2C193F891700954859 /* Debug */,
+				FDA98A2D193F891700954859 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FDA98A2E193F891700954859 /* Build configuration list for PBXNativeTarget "facebook-login" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDA98A2F193F891700954859 /* Debug */,
+				FDA98A30193F891700954859 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		FDA98A31193F891700954859 /* Build configuration list for PBXNativeTarget "facebook-loginTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDA98A32193F891700954859 /* Debug */,
+				FDA98A33193F891700954859 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FDA98A0A193F891700954859 /* Project object */;
+}

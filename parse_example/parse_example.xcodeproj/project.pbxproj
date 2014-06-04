@@ -23,6 +23,7 @@
 		FD977C6C193EC20600803F2C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD977C6B193EC20600803F2C /* Security.framework */; };
 		FD977C6E193EC20B00803F2C /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD977C6D193EC20B00803F2C /* StoreKit.framework */; };
 		FD977C70193EC21200803F2C /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD977C6F193EC21200803F2C /* SystemConfiguration.framework */; };
+		FDA98A3B193F8C2300954859 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FDA98A3A193F8C2300954859 /* Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 		FD977C6B193EC20600803F2C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		FD977C6D193EC20B00803F2C /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		FD977C6F193EC21200803F2C /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		FDA98A3A193F8C2300954859 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FDCC2A05193EC2890003116A /* Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Swift.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -167,6 +169,7 @@
 			isa = PBXGroup;
 			children = (
 				FDCC2A05193EC2890003116A /* Swift.h */,
+				FDA98A3A193F8C2300954859 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -253,6 +256,7 @@
 			files = (
 				FD977C43193EC16300803F2C /* Main.storyboard in Resources */,
 				FD977C45193EC16300803F2C /* Images.xcassets in Resources */,
+				FDA98A3B193F8C2300954859 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
