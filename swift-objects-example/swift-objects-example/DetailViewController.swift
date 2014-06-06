@@ -54,7 +54,9 @@ class DetailViewController : UIViewController, UIPickerViewDataSource, UIPickerV
             var webView = UIWebView(frame:self.view.bounds)
             var url = NSURL(string: "http://garethpaul.com")
             var request = NSURLRequest(URL: url)
+            var webViewDidFinishLoad = UIWebView()
             webView.loadRequest(request)
+            
             self.view.addSubview(webView)
         }
         else if self.title == "UISegmentedControl"
