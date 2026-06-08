@@ -37,12 +37,7 @@ class ViewController: UIViewController, FBLoginViewDelegate {
         self.view.addSubview(nameLabel)
         self.view.addSubview(statusLabel)
         
-        
-        var applicationId = String("8eQR5sFwbogIl6Ehs1AUvJKXc8hrnyFePaNYeSek")
-        var clientKey = String("NCS4G5MSMNpbdiUWM67v2d7EmFJeKFl5TRbyZ8VD")
-        
-        
-        //var login : Void = Parse.setApplicationId(applicationId, clientKey: clientKey)
+        // Configure Parse locally before adding Parse login calls.
         
         var permissions: AnyObject[] = ["public_profile", "email", "user_friends"];
         

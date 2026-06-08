@@ -5,4 +5,5 @@
 3. You need to import a bunch of libs to get Parse working e.g. SystemConfiguration.framework, StoreKit.framework, Security.framework, QuartzCore.framework, MobileCoreServices.framework, libz.dylib, CoreLocation.framework, CoreGraphics.framework, CFNetwork.framework and finally AudioToolbox.framework
 4. You need to create a Swift.h file with the line ``` #import <Parse/Parse.h> ```
 5. You will need to reference the Swift.h file within Swift Compiler - Code Generation under Build Settings
-
+6. Keep real Parse application IDs, client keys, and tokenized asset URLs in
+local configuration only. Checked-in examples should use placeholders.

@@ -52,8 +52,10 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Testing and Verification
 
 - `make verify` runs static sample inventory checks and confirms generated
-  Xcode user state is not tracked. When `xcodebuild` is installed, the `build`
-  target attempts to build each sample target for the iOS simulator.
+  Xcode user state is not tracked. It also scans tracked text files for known
+  credential-like sample markers and tokenized URLs. When `xcodebuild` is
+  installed, the `build` target attempts to build each sample target for the
+  iOS simulator.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 
@@ -62,6 +64,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Configuration and Secrets
 
 - No required secret or credential file was identified in the repository scan. If you add integrations later, keep secrets out of git.
+- Facebook and Parse examples should keep app IDs, client keys, and access
+  tokens in local setup only; checked-in examples should use placeholders or
+  non-secret sample URLs.
 
 ## Security and Privacy Notes
 

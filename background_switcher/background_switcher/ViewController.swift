@@ -26,7 +26,7 @@ class ViewController: UIViewController {
         var view:UIView = UIView(frame: CGRectMake(0,0,width,height))
         self.view.addSubview(view)
         var backgroundImage:UIImage = UIImage(named:backgroundDict["Background1"])
-        var urlString = "https://trusteads.appspot.com//img?token=9af1a259-2b33-4ca7-b605-28a2cc112608"
+        var urlString = "https://example.com/sample-background.jpg"
         var imgURL: NSURL = NSURL(string: urlString)
         var imgData: NSData = NSData(contentsOfURL: imgURL)
         imageView = UIImageView(frame: view.frame)
@@ -72,5 +72,3 @@ class ViewController: UIViewController {
     
     
 }
-
-

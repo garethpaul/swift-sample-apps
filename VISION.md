@@ -16,6 +16,7 @@ Priority:
 
 - Preserve each sample app as an independent reference
 - Keep service credentials out of source control
+- Keep checked-in service examples placeholder-only
 - Maintain the top-level index of included examples
 - Treat Swift and SDK versions as legacy until documented per sample
 

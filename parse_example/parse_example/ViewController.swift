@@ -15,7 +15,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        var urlString = "https://trusteads.appspot.com//img?token=9af1a259-2b33-4ca7-b605-28a2cc112608"
+        var urlString = "https://example.com/sample-background.jpg"
         var imgURL: NSURL = NSURL(string: urlString)
         // Download an NSData representation of the image at the URL
         var imgData: NSData = NSData(contentsOfURL: imgURL)
@@ -40,4 +40,3 @@ class ViewController: UIViewController {
 
 
 }
-
