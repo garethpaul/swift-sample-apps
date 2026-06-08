@@ -39,7 +39,7 @@ Authentication and backend samples can expose credentials or user information.
 Each sample should use fake data, local configuration, and explicit service
 setup instructions.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Checked-in service credentials
 - Cross-sample rewrites without a migration plan
