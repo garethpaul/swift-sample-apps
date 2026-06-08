@@ -24,6 +24,7 @@ KNOWN_CREDENTIAL_MARKERS = (
     "NCS4G5MSMNpbdiUWM67v2d7EmFJeKFl5TRbyZ8VD",
 )
 TOKENIZED_URL_RE = re.compile(r"https?://[^\"'\\s]+[?&]token=[A-Za-z0-9._~-]{12,}")
+SYNC_IMAGE_LOAD_RE = re.compile(r"NSData\s*\(\s*contentsOfURL")
 
 
 def tracked_files():
@@ -80,6 +81,8 @@ def samples_checks():
                 errors.append(f"tracked credential-like marker must be removed from {path}")
         if TOKENIZED_URL_RE.search(text):
             errors.append(f"tracked tokenized URL must be replaced with a placeholder in {path}")
+        if path.endswith(".swift") and SYNC_IMAGE_LOAD_RE.search(text):
+            errors.append(f"synchronous network image loading must be removed from {path}")
 
     return errors
 

@@ -13,7 +13,7 @@ import QuartzCore
 class ViewController: UIViewController {
     
     var imageView:UIImageView = UIImageView()
-    var backgroundDict:Dictionary<String,String> = Dictionary()
+    var backgroundDict:Dictionary<String,UIColor> = Dictionary()
     
     
     override func viewDidLoad() {
@@ -21,16 +21,15 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         var width:CGFloat = 320
         var height:CGFloat = 568
-        backgroundDict = ["Background1":"http://scontent-b.cdninstagram.com/hphotos-xfp1/t51.2885-15/10362298_1412014695748047_1496400892_n.jpg","Background2":"http://scontent-b.cdninstagram.com/hphotos-xpa1/t51.2885-15/10296956_280293632148907_639323969_n.jpg"]
+        backgroundDict = [
+            "Background1": UIColor(red: 0.18, green: 0.33, blue: 0.58, alpha: 1.0),
+            "Background2": UIColor(red: 0.64, green: 0.20, blue: 0.32, alpha: 1.0)
+        ]
         var buttonTitles = ["Background 1", "Background 2"]
         var view:UIView = UIView(frame: CGRectMake(0,0,width,height))
         self.view.addSubview(view)
-        var backgroundImage:UIImage = UIImage(named:backgroundDict["Background1"])
-        var urlString = "https://example.com/sample-background.jpg"
-        var imgURL: NSURL = NSURL(string: urlString)
-        var imgData: NSData = NSData(contentsOfURL: imgURL)
         imageView = UIImageView(frame: view.frame)
-        imageView.image = UIImage(data: imgData)
+        imageView.backgroundColor = backgroundDict["Background1"]
         
         view.addSubview(imageView)
         
@@ -54,15 +53,14 @@ class ViewController: UIViewController {
     func buttonClicked(sender:UIButton) {
         var button:UIButton = sender
         var imageSelector:String = "Background\(button.tag)"
-        var imgURL: NSURL = NSURL(string: self.backgroundDict[imageSelector])
-        var imgData: NSData = NSData(contentsOfURL: imgURL)
+        if let backgroundColor = self.backgroundDict[imageSelector] {
         
-        UIView.animateWithDuration(0.4, animations: {self.imageView.alpha=0},
-            completion: {
-                
-                _ in self.imageView.image = UIImage(data: imgData)
-                UIView.animateWithDuration(0.4, animations: {self.imageView.alpha=1})
-            })
+            UIView.animateWithDuration(0.4, animations: {self.imageView.alpha=0},
+                completion: {
+                    _ in self.imageView.backgroundColor = backgroundColor
+                    UIView.animateWithDuration(0.4, animations: {self.imageView.alpha=1})
+                })
+        }
     }
     
     override func didReceiveMemoryWarning() {

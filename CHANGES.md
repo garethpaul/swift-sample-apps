@@ -2,6 +2,8 @@
 
 ## 2026-06-08
 
+- Removed synchronous remote image downloads from the background switcher and
+  Parse examples, with static checker coverage.
 - Added `make check` as the shared repository verification alias.
 - Removed hardcoded credential-like Parse values and tokenized sample image
   URLs from the Facebook, Parse, and background switcher samples.

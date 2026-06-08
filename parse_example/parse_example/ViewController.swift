@@ -15,16 +15,12 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        var urlString = "https://example.com/sample-background.jpg"
-        var imgURL: NSURL = NSURL(string: urlString)
-        // Download an NSData representation of the image at the URL
-        var imgData: NSData = NSData(contentsOfURL: imgURL)
         var width:CGFloat = 320
         var height:CGFloat = 568
         var view:UIView = UIView(frame: CGRectMake(0,0,width,height))
         self.view.addSubview(view)
         imageView = UIImageView(frame: view.frame)
-        imageView.image = UIImage(data: imgData)
+        imageView.backgroundColor = UIColor.lightGrayColor()
         view.addSubview(imageView)
         
         
