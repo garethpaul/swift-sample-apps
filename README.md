@@ -14,8 +14,13 @@ This README is based on the checked-in source, manifests, scripts, and repositor
 - `README.md` - project overview and local usage notes
 - `background_switcher` - source or example code
 - `basic-note-taker` - source or example code
+- `CHANGES.md` - maintenance history for sample hygiene checks
+- `Makefile` - local verification entry points
+- `docs/plans` - completed maintenance plans for the current baseline
 - `facebook-login` - source or example code
 - `parse_example` - source or example code
+- `plans` - historical implementation notes
+- `scripts` - static sample inventory and hygiene validators
 - `SECURITY.md` - security reporting and disclosure guidance
 - `swift-objects-example` - source or example code
 - `todo-list` - source or example code
@@ -56,6 +61,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   credential-like sample markers and tokenized URLs. When `xcodebuild` is
   installed, the `build` target attempts to build each sample target for the
   iOS simulator.
+- Hygiene checks also require completed canonical plans under `docs/plans`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 
@@ -80,6 +86,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - This looks like an Apple platform project or sample. Xcode, Swift, CocoaPods, and deployment target versions may need to match the original project era.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
+- See `docs/plans/2026-06-08-swift-sample-apps-baseline.md` for the canonical
+  sample archive hygiene baseline.
 
 ## Contributing
 

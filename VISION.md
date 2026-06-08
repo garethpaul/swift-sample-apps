@@ -18,6 +18,7 @@ Priority:
 - Keep service credentials out of source control
 - Keep checked-in service examples placeholder-only
 - Maintain the top-level index of included examples
+- Keep completed maintenance plans under `docs/plans`
 - Treat Swift and SDK versions as legacy until documented per sample
 
 Next priorities:

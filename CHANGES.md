@@ -12,3 +12,5 @@
 - Removed tracked Xcode per-user state files from sample projects.
 - Added ignore rules for Xcode user state and DerivedData.
 - Documented the local static verification workflow.
+- Added canonical `docs/plans` coverage and made hygiene checks require
+  completed plans.
