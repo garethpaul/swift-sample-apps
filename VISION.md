@@ -45,3 +45,6 @@ setup instructions.
 - Cross-sample rewrites without a migration plan
 - Real user data in fixtures
 - Production-readiness claims for archive samples
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
