@@ -79,4 +79,4 @@ Keep changes small and tied to the project that is already present in this repos
 
 Prior README summary:
 
-> swift-sample-apps <!-- README-OVERVIEW-IMAGE --> swift-sample-apps ================= Creating a master repo for the slew of random iOS apps.
+> swift-sample-apps swift-sample-apps ================= Creating a master repo for the slew of random iOS apps.
