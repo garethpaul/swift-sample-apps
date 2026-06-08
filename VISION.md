@@ -39,7 +39,6 @@ Canonical security policy and reporting:
 
 - [`SECURITY.md`](SECURITY.md)
 
-
 Authentication and backend samples can expose credentials or user information.
 Each sample should use fake data, local configuration, and explicit service
 setup instructions.
