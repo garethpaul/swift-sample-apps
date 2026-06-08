@@ -2,6 +2,7 @@
 
 ## 2026-06-08
 
+- Added `make check` as the shared repository verification alias.
 - Removed hardcoded credential-like Parse values and tokenized sample image
   URLs from the Facebook, Parse, and background switcher samples.
 - Extended the sample checker to scan tracked text files for known

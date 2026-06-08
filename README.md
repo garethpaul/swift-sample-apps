@@ -51,7 +51,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
-- `make verify` runs static sample inventory checks and confirms generated
+- `make check` runs static sample inventory checks and confirms generated
   Xcode user state is not tracked. It also scans tracked text files for known
   credential-like sample markers and tokenized URLs. When `xcodebuild` is
   installed, the `build` target attempts to build each sample target for the
