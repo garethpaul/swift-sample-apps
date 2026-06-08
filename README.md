@@ -1,5 +1,8 @@
 # swift-sample-apps
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 ## Overview
 
 `garethpaul/swift-sample-apps` is an Apple platform application or Swift sample. Creating a master repo for the slew of random iOS apps. 
@@ -77,4 +80,3 @@ Keep changes small and tied to the project that is already present in this repos
 Prior README summary:
 
 > swift-sample-apps <!-- README-OVERVIEW-IMAGE --> swift-sample-apps ================= Creating a master repo for the slew of random iOS apps.
-
