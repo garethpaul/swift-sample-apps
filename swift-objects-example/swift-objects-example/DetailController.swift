@@ -53,7 +53,7 @@ class DetailController : UIViewController, UIPickerViewDataSource, UIPickerViewD
         else if self.title == "UIWebView"
         {
             var webView = UIWebView(frame:self.view.bounds)
-            var url = NSURL(string: "http://caipiao.taobao.com")
+            var url = NSURL(string: "https://caipiao.taobao.com")
             var request = NSURLRequest(URL: url)
             webView.loadRequest(request)
             self.view.addSubview(webView)
