@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         var width:CGFloat = 320
         var height:CGFloat = 568
-        backgroundDict = ["Background1":"http://scontent-b.cdninstagram.com/hphotos-xfp1/t51.2885-15/10362298_1412014695748047_1496400892_n.jpg","Background2":"http://scontent-b.cdninstagram.com/hphotos-xpa1/t51.2885-15/10296956_280293632148907_639323969_n.jpg"]
+        backgroundDict = ["Background1":"https://scontent-b.cdninstagram.com/hphotos-xfp1/t51.2885-15/10362298_1412014695748047_1496400892_n.jpg","Background2":"https://scontent-b.cdninstagram.com/hphotos-xpa1/t51.2885-15/10296956_280293632148907_639323969_n.jpg"]
         var buttonTitles = ["Background 1", "Background 2"]
         var view:UIView = UIView(frame: CGRectMake(0,0,width,height))
         self.view.addSubview(view)
@@ -72,5 +72,4 @@ class ViewController: UIViewController {
     
     
 }
-
 
