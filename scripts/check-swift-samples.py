@@ -17,7 +17,7 @@ SAMPLES = (
     "swift-objects-example",
     "todo-list",
 )
-TEXT_SUFFIXES = {".h", ".md", ".plist", ".swift", ".txt"}
+TEXT_SUFFIXES = {".h", ".md", ".pbxproj", ".plist", ".swift", ".txt"}
 KNOWN_CREDENTIAL_MARKERS = (
     "9af1a259-2b33-4ca7-b605-28a2cc112608",
     "8eQR5sFwbogIl6Ehs1AUvJKXc8hrnyFePaNYeSek",
@@ -27,6 +27,7 @@ TOKENIZED_URL_RE = re.compile(r"https?://[^\"'\\s]+[?&]token=[A-Za-z0-9._~-]{12,
 SYNC_IMAGE_LOAD_RE = re.compile(r"NSData\s*\(\s*contentsOfURL")
 INSECURE_SWIFT_URL_RE = re.compile(r"NSURL\s*\(\s*string:\s*\"http://")
 SWIFT_PRINT_RE = re.compile(r"\bprint(?:ln)?\s*\(")
+LOCAL_XCODE_PATH_RE = re.compile(r"(/Users/|/home/|path = (?:\.\./)+(?:Desktop|Documents)/)")
 FACEBOOK_LOGIN_CONTROLLER = "facebook-login/facebook-login/ViewController.swift"
 
 
@@ -100,6 +101,8 @@ def samples_checks():
             errors.append(f"insecure remote URL literals must be replaced with local or HTTPS placeholders in {path}")
         if path.endswith(".swift") and has_active_swift_print(text):
             errors.append(f"active Swift print/println debug logging must be removed from {path}")
+        if path.endswith(".pbxproj") and LOCAL_XCODE_PATH_RE.search(text):
+            errors.append(f"local Xcode paths must be replaced with repo-relative placeholders in {path}")
         if path == FACEBOOK_LOGIN_CONTROLLER and "var error: NSError?" in text:
             errors.append(f"Facebook login error handling must not shadow the delegate NSError in {path}")
         if path == FACEBOOK_LOGIN_CONTROLLER and "error!" in text:

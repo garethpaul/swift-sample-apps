@@ -36,7 +36,7 @@
 		FDA98A24193F891700954859 /* facebook-loginTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "facebook-loginTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDA98A29193F891700954859 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FDA98A2A193F891700954859 /* facebook_loginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = facebook_loginTests.swift; sourceTree = "<group>"; };
-		FDA98A35193F892800954859 /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../../../Documents/FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
+		FDA98A35193F892800954859 /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = Frameworks/FacebookSDK.framework; sourceTree = SOURCE_ROOT; };
 		FDA98A39193F897D00954859 /* Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Swift.h; sourceTree = "<group>"; };
 		FDA98A3C193F8C8800954859 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -355,7 +355,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/gjones/Documents/FacebookSDK,
+					"$(SRCROOT)/Frameworks",
 				);
 				INFOPLIST_FILE = "facebook-login/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -371,7 +371,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/gjones/Documents/FacebookSDK,
+					"$(SRCROOT)/Frameworks",
 				);
 				INFOPLIST_FILE = "facebook-login/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

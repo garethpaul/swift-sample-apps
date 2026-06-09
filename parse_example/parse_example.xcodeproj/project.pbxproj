@@ -46,7 +46,7 @@
 		FD977C4A193EC16300803F2C /* parse_exampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = parse_exampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD977C4F193EC16300803F2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD977C50193EC16300803F2C /* parse_exampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = parse_exampleTests.swift; sourceTree = "<group>"; };
-		FD977C5B193EC1C400803F2C /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Parse.framework; path = ../../Desktop/Parse.framework; sourceTree = "<group>"; };
+		FD977C5B193EC1C400803F2C /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Parse.framework; path = Frameworks/Parse.framework; sourceTree = SOURCE_ROOT; };
 		FD977C5D193EC1D700803F2C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		FD977C5F193EC1DE00803F2C /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		FD977C61193EC1E400803F2C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -396,12 +396,12 @@
 				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/gjones/Desktop,
+					"$(SRCROOT)/Frameworks",
 				);
 				INFOPLIST_FILE = parse_example/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = /Users/gjones/workspace/parse_example/Swift.h;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Swift.h";
 			};
 			name = Debug;
 		};
@@ -413,12 +413,12 @@
 				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					/Users/gjones/Desktop,
+					"$(SRCROOT)/Frameworks",
 				);
 				INFOPLIST_FILE = parse_example/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = /Users/gjones/workspace/parse_example/Swift.h;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Swift.h";
 			};
 			name = Release;
 		};

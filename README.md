@@ -62,7 +62,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   image loads. Swift source checks also reject literal insecure `http://` URL
   requests so archive web-view demos stay local or use explicit HTTPS
   placeholders, active `print`/`println` debug logging, and Facebook login
-  error handlers that discard or force-unwrap the delegate error. When
+  error handlers that discard or force-unwrap the delegate error. Xcode project
+  checks reject developer-local framework and bridging-header paths. When
   `xcodebuild` is installed, the `build` target attempts to build each sample
   target for the iOS simulator.
 - Hygiene checks also require completed canonical plans under `docs/plans`.
@@ -77,6 +78,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Facebook and Parse examples should keep app IDs, client keys, and access
   tokens in local setup only; checked-in examples should use placeholders or
   non-secret sample URLs.
+- Facebook and Parse SDK frameworks should be supplied locally under each
+  sample's `Frameworks` directory when opening those archived projects in Xcode.
 
 ## Security and Privacy Notes
 
@@ -100,6 +103,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   guard.
 - See `docs/plans/2026-06-09-facebook-error-handling.md` for the Facebook login
   error handling guard.
+- See `docs/plans/2026-06-09-local-xcode-paths.md` for the Xcode framework path
+  placeholder guard.
 
 ## Contributing
 

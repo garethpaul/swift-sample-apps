@@ -22,6 +22,7 @@ Priority:
 - Avoid ad hoc Swift debug prints in archive samples
 - Preserve delegate-supplied SDK errors instead of shadowing or force-unwrapping
   them
+- Keep Xcode framework and bridging-header paths repo-relative
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`
 - Treat Swift and SDK versions as legacy until documented per sample
@@ -55,6 +56,7 @@ setup instructions.
 - Checked-in service credentials
 - Ad hoc debug logging from sample app sources
 - Shadowed or force-unwrapped SDK error objects in sample callbacks
+- Developer-local absolute paths in Xcode project files
 - Cross-sample rewrites without a migration plan
 - Real user data in fixtures
 - Production-readiness claims for archive samples

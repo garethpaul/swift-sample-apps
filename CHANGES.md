@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Replaced developer-local Facebook and Parse Xcode framework paths with
+  repo-relative placeholders and added static guard coverage.
 - Fixed the Facebook login error handler to use the delegate-supplied
   `NSError` instead of shadowing it with `nil`.
 - Extended Swift sample checks to reject Facebook login error shadowing and
