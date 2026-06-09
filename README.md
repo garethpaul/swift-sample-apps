@@ -62,7 +62,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   image loads. Swift source checks also reject literal insecure `http://` URL
   requests so archive web-view demos stay local or use explicit HTTPS
   placeholders, active `print`/`println` debug logging, and Facebook login
-  error handlers that discard or force-unwrap the delegate error. Xcode project
+  error handlers that discard or force-unwrap the delegate error. The checks
+  also require the Parse sample save callback to inspect errors before
+  reporting completion. Xcode project
   checks reject developer-local framework and bridging-header paths. When
   `xcodebuild` is installed, the `build` target attempts to build each sample
   target for the iOS simulator.
@@ -105,6 +107,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   error handling guard.
 - See `docs/plans/2026-06-09-local-xcode-paths.md` for the Xcode framework path
   placeholder guard.
+- See `docs/plans/2026-06-09-parse-save-error-handling.md` for the Parse save
+  callback error handling guard.
 
 ## Contributing
 

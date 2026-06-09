@@ -22,6 +22,7 @@ Priority:
 - Avoid ad hoc Swift debug prints in archive samples
 - Preserve delegate-supplied SDK errors instead of shadowing or force-unwrapping
   them
+- Check Parse save callback errors before reporting completion
 - Keep Xcode framework and bridging-header paths repo-relative
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`

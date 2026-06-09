@@ -21,7 +21,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         var obj = PFObject(className:"Cool Object")
         obj.setObject("bar", forKey: "foo")
         obj.saveInBackgroundWithBlock({ (succeeded: Bool!, err: NSError!) -> Void in
-            NSLog("Done");
+            if err != nil {
+                NSLog("Parse save failed:%@", err)
+                return
+            }
+            if !succeeded {
+                NSLog("Parse save did not complete")
+            }
             })
         
         return true
@@ -56,5 +62,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
         
-
 

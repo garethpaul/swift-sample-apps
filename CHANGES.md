@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Updated the Parse sample save callback to handle `NSError` and unsuccessful
+  saves before reporting completion.
 - Replaced developer-local Facebook and Parse Xcode framework paths with
   repo-relative placeholders and added static guard coverage.
 - Fixed the Facebook login error handler to use the delegate-supplied
