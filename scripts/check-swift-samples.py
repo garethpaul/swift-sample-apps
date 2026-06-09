@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_PLANS = ROOT / "docs" / "plans"
 CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-swift-sample-apps-baseline.md"
+NOTE_INDEX_PLAN = DOCS_PLANS / "2026-06-09-note-index-guard.md"
 SAMPLES = (
     "background_switcher",
     "basic-note-taker",
@@ -30,6 +31,7 @@ SWIFT_PRINT_RE = re.compile(r"\bprint(?:ln)?\s*\(")
 LOCAL_XCODE_PATH_RE = re.compile(r"(/Users/|/home/|path = (?:\.\./)+(?:Desktop|Documents)/)")
 FACEBOOK_LOGIN_CONTROLLER = "facebook-login/facebook-login/ViewController.swift"
 PARSE_APP_DELEGATE = "parse_example/parse_example/AppDelegate.swift"
+NOTE_LIST_CONTROLLER = "basic-note-taker/basic-note-taker/NoteListViewController.swift"
 
 
 def tracked_files():
@@ -58,6 +60,8 @@ def hygiene_checks():
     errors = []
     if not CANONICAL_PLAN.exists():
         errors.append("docs/plans/2026-06-08-swift-sample-apps-baseline.md is missing")
+    if not NOTE_INDEX_PLAN.exists():
+        errors.append("docs/plans/2026-06-09-note-index-guard.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -116,6 +120,18 @@ def samples_checks():
             errors.append(f"Parse save callback must log save failures in {path}")
         if path == PARSE_APP_DELEGATE and "Parse save did not complete" not in text:
             errors.append(f"Parse save callback must log unsuccessful saves without NSError metadata in {path}")
+        if path == NOTE_LIST_CONTROLLER and "func note(indexPath: NSIndexPath) -> String {" in text:
+            errors.append(f"basic note lookup must return an optional instead of indexing unconditionally in {path}")
+        if path == NOTE_LIST_CONTROLLER and "func note(indexPath: NSIndexPath) -> String?" not in text:
+            errors.append(f"basic note lookup must return nil for stale index paths in {path}")
+        if path == NOTE_LIST_CONTROLLER and "indexPath.row < 0 || indexPath.row >= notes.count" not in text:
+            errors.append(f"basic note lookup must guard indexPath.row before reading notes in {path}")
+        if path == NOTE_LIST_CONTROLLER and "if let selectedNoteText = note(indexPath)" not in text:
+            errors.append(f"basic note selection must optional-bind note lookup before opening the editor in {path}")
+        if path == NOTE_LIST_CONTROLLER and "cell.textLabel.text = note(indexPath)" in text:
+            errors.append(f"basic note cells must not assign an unchecked note lookup in {path}")
+        if path == NOTE_LIST_CONTROLLER and "sselectedNote >= 0 && sselectedNote < notes.count" not in text:
+            errors.append(f"basic note editor updates must guard selectedNote before writing notes in {path}")
 
     return errors
 

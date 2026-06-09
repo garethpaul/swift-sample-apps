@@ -40,8 +40,10 @@ class NoteListViewController: UITableViewController, NoteEditorViewControllerDel
     }
     
     override func tableView(tableView: UITableView!, didSelectRowAtIndexPath indexPath: NSIndexPath!) {
-        editor = NoteEditorViewController(note: note(indexPath))
-        selectedNote = indexPath.row
+        if let selectedNoteText = note(indexPath) {
+            editor = NoteEditorViewController(note: selectedNoteText)
+            selectedNote = indexPath.row
+        }
     }
     
     override func tableView(tableView: UITableView!, numberOfRowsInSection section: Int) -> Int {
@@ -51,18 +53,27 @@ class NoteListViewController: UITableViewController, NoteEditorViewControllerDel
     override func tableView(tableView: UITableView!, cellForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCell! {
         // I think I ought to use an optional here to explicity cope with potential nils
         let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath) as UITableViewCell
-        cell.textLabel.text = note(indexPath)
+        if let noteText = note(indexPath) {
+            cell.textLabel.text = noteText
+        } else {
+            cell.textLabel.text = ""
+        }
         return cell
     }
     
-    func note(indexPath: NSIndexPath) -> String {
+    func note(indexPath: NSIndexPath) -> String? {
+        if indexPath.row < 0 || indexPath.row >= notes.count {
+            return nil
+        }
         return notes[indexPath.row]
     }
     
     func noteEditorDidUpdateNote(editor: NoteEditorViewController) {
         if let sselectedNote: Int = selectedNote {
-            notes[sselectedNote] = editor.note
-            tableView.reloadData()
+            if sselectedNote >= 0 && sselectedNote < notes.count {
+                notes[sselectedNote] = editor.note
+                tableView.reloadData()
+            }
         }
     }
 }

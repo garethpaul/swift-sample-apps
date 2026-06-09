@@ -23,6 +23,7 @@ Priority:
 - Preserve delegate-supplied SDK errors instead of shadowing or force-unwrapping
   them
 - Check Parse save callback errors before reporting completion
+- Guard sample table indexes before reading or updating local arrays
 - Keep Xcode framework and bridging-header paths repo-relative
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`
@@ -33,6 +34,7 @@ Next priorities:
 - Add a README table with each sample, purpose, and required services
 - Document Xcode and iOS version assumptions per app
 - Add setup notes for Facebook and Parse examples without secrets
+- Add sample-specific notes for legacy table/data-source assumptions
 - Archive or modernize samples one at a time
 
 Contribution rules:
