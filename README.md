@@ -59,7 +59,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check` runs static sample inventory checks and confirms generated
   Xcode user state is not tracked. It also scans tracked text files for known
   credential-like sample markers, tokenized URLs, and synchronous URL-backed
-  image loads. When `xcodebuild` is installed, the `build` target attempts to
+  image loads. Swift source checks also reject literal insecure `http://` URL
+  requests so archive web-view demos stay local or use explicit HTTPS
+  placeholders. When `xcodebuild` is installed, the `build` target attempts to
   build each sample target for the iOS simulator.
 - Hygiene checks also require completed canonical plans under `docs/plans`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
@@ -90,6 +92,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   sample archive hygiene baseline.
 - See `docs/plans/2026-06-08-no-sync-image-downloads.md` for the synchronous
   image download guard.
+- See `docs/plans/2026-06-08-local-webview-content.md` for the local web-view
+  sample guard.
 
 ## Contributing
 

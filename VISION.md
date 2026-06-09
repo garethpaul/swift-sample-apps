@@ -18,6 +18,7 @@ Priority:
 - Keep service credentials out of source control
 - Keep checked-in service examples placeholder-only
 - Avoid main-thread remote image downloads in archive samples
+- Keep web-view demos local unless a sample documents its network setup
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`
 - Treat Swift and SDK versions as legacy until documented per sample

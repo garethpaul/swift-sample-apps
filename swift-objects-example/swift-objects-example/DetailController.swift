@@ -53,9 +53,8 @@ class DetailController : UIViewController, UIPickerViewDataSource, UIPickerViewD
         else if self.title == "UIWebView"
         {
             var webView = UIWebView(frame:self.view.bounds)
-            var url = NSURL(string: "http://caipiao.taobao.com")
-            var request = NSURLRequest(URL: url)
-            webView.loadRequest(request)
+            var html = "<html><body><h1>UIWebView</h1><p>Local archive sample content.</p></body></html>"
+            webView.loadHTMLString(html, baseURL: nil)
             self.view.addSubview(webView)
         }
         else if self.title == "UISegmentedControl"

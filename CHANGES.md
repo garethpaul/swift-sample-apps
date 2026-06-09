@@ -2,6 +2,9 @@
 
 ## 2026-06-08
 
+- Replaced remote HTTP UIWebView requests with local sample HTML and added
+  checker coverage for insecure Swift URL literals.
+- Ignored Python bytecode caches produced by local checker syntax validation.
 - Removed synchronous remote image downloads from the background switcher and
   Parse examples, with static checker coverage.
 - Added `make check` as the shared repository verification alias.

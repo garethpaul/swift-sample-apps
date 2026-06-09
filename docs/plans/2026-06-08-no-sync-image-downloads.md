@@ -34,6 +34,6 @@ image hosts just to demonstrate UI behavior.
 
 ## Follow-Up Candidates
 
-- Replace remaining legacy `UIWebView` HTTP examples with local HTML or HTTPS
-  placeholder pages.
+- Modernize legacy `UIWebView` examples to `WKWebView` one sample at a time
+  when the archive supports a newer Swift toolchain.
 - Add per-sample README notes for which examples require external SDK setup.

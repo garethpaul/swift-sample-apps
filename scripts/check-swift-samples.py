@@ -25,6 +25,7 @@ KNOWN_CREDENTIAL_MARKERS = (
 )
 TOKENIZED_URL_RE = re.compile(r"https?://[^\"'\\s]+[?&]token=[A-Za-z0-9._~-]{12,}")
 SYNC_IMAGE_LOAD_RE = re.compile(r"NSData\s*\(\s*contentsOfURL")
+INSECURE_SWIFT_URL_RE = re.compile(r"NSURL\s*\(\s*string:\s*\"http://")
 
 
 def tracked_files():
@@ -83,6 +84,8 @@ def samples_checks():
             errors.append(f"tracked tokenized URL must be replaced with a placeholder in {path}")
         if path.endswith(".swift") and SYNC_IMAGE_LOAD_RE.search(text):
             errors.append(f"synchronous network image loading must be removed from {path}")
+        if path.endswith(".swift") and INSECURE_SWIFT_URL_RE.search(text):
+            errors.append(f"insecure remote URL literals must be replaced with local or HTTPS placeholders in {path}")
 
     return errors
 
