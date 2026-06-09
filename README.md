@@ -61,9 +61,10 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   credential-like sample markers, tokenized URLs, and synchronous URL-backed
   image loads. Swift source checks also reject literal insecure `http://` URL
   requests so archive web-view demos stay local or use explicit HTTPS
-  placeholders, and active `print`/`println` debug logging. When `xcodebuild`
-  is installed, the `build` target attempts to build each sample target for the
-  iOS simulator.
+  placeholders, active `print`/`println` debug logging, and Facebook login
+  error handlers that discard or force-unwrap the delegate error. When
+  `xcodebuild` is installed, the `build` target attempts to build each sample
+  target for the iOS simulator.
 - Hygiene checks also require completed canonical plans under `docs/plans`.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
@@ -97,6 +98,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   sample guard.
 - See `docs/plans/2026-06-09-debug-print-guard.md` for the Swift debug print
   guard.
+- See `docs/plans/2026-06-09-facebook-error-handling.md` for the Facebook login
+  error handling guard.
 
 ## Contributing
 

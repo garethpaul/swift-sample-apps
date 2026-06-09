@@ -27,6 +27,7 @@ TOKENIZED_URL_RE = re.compile(r"https?://[^\"'\\s]+[?&]token=[A-Za-z0-9._~-]{12,
 SYNC_IMAGE_LOAD_RE = re.compile(r"NSData\s*\(\s*contentsOfURL")
 INSECURE_SWIFT_URL_RE = re.compile(r"NSURL\s*\(\s*string:\s*\"http://")
 SWIFT_PRINT_RE = re.compile(r"\bprint(?:ln)?\s*\(")
+FACEBOOK_LOGIN_CONTROLLER = "facebook-login/facebook-login/ViewController.swift"
 
 
 def tracked_files():
@@ -99,6 +100,10 @@ def samples_checks():
             errors.append(f"insecure remote URL literals must be replaced with local or HTTPS placeholders in {path}")
         if path.endswith(".swift") and has_active_swift_print(text):
             errors.append(f"active Swift print/println debug logging must be removed from {path}")
+        if path == FACEBOOK_LOGIN_CONTROLLER and "var error: NSError?" in text:
+            errors.append(f"Facebook login error handling must not shadow the delegate NSError in {path}")
+        if path == FACEBOOK_LOGIN_CONTROLLER and "error!" in text:
+            errors.append(f"Facebook login error handling must not force-unwrap NSError values in {path}")
 
     return errors
 

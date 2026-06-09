@@ -20,6 +20,8 @@ Priority:
 - Avoid main-thread remote image downloads in archive samples
 - Keep web-view demos local unless a sample documents its network setup
 - Avoid ad hoc Swift debug prints in archive samples
+- Preserve delegate-supplied SDK errors instead of shadowing or force-unwrapping
+  them
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`
 - Treat Swift and SDK versions as legacy until documented per sample
@@ -52,6 +54,7 @@ setup instructions.
 
 - Checked-in service credentials
 - Ad hoc debug logging from sample app sources
+- Shadowed or force-unwrapped SDK error objects in sample callbacks
 - Cross-sample rewrites without a migration plan
 - Real user data in fixtures
 - Production-readiness claims for archive samples

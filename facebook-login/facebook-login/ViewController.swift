@@ -73,7 +73,6 @@ class ViewController: UIViewController, FBLoginViewDelegate {
         var alertMessage: NSString = ""
         
         // You need to override loginView:handleError in order to handle possible errors that can occur during login
-        var error: NSError?
         if (FBErrorUtility.shouldNotifyUserForError(error)) {
             alertTitle = "Facebook error"
             alertMessage = FBErrorUtility.userMessageForError(error)
@@ -96,7 +95,7 @@ class ViewController: UIViewController, FBLoginViewDelegate {
         } else {
             alertTitle  = "Something went wrong"
             alertMessage = "Please try again later."
-            NSLog("Unexpected error:%@", error!)
+            NSLog("Unexpected error:%@", error)
         }
         
         var alertView: UIAlertView = UIAlertView(title: alertTitle, message: alertMessage, delegate: nil, cancelButtonTitle: "OK")

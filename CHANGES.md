@@ -2,6 +2,10 @@
 
 ## 2026-06-09
 
+- Fixed the Facebook login error handler to use the delegate-supplied
+  `NSError` instead of shadowing it with `nil`.
+- Extended Swift sample checks to reject Facebook login error shadowing and
+  forced `NSError` unwraps.
 - Removed background-switcher loop-index debug logging from view setup.
 - Extended Swift sample checks to reject active `print`/`println` debug logging
   in tracked Swift sources.
