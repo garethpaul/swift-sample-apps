@@ -41,14 +41,21 @@ class ViewController : UIViewController, UITableViewDelegate, UITableViewDataSou
     
     func tableView(tableView: UITableView!, numberOfRowsInSection section: Int) -> Int
     {
-        return self.items!.count
+        if let currentItems = self.items {
+            return currentItems.count
+        }
+        return 0
     }
     
     func tableView(tableView: UITableView!, cellForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCell!
     {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as UITableViewCell!
         cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-        cell.textLabel.text = self.items?.objectAtIndex(indexPath.row) as String
+        if let itemTitle = item(indexPath) {
+            cell.textLabel.text = itemTitle
+        } else {
+            cell.textLabel.text = ""
+        }
         
         return cell
     }
@@ -58,14 +65,25 @@ class ViewController : UIViewController, UITableViewDelegate, UITableViewDataSou
     {
         self.tableView!.deselectRowAtIndexPath(indexPath, animated: true)
         
-        var detailViewController = DetailViewController()
-        detailViewController.title = self.items?.objectAtIndex(indexPath.row)  as String
-        self.navigationController.pushViewController(detailViewController, animated:true)
+        if let selectedItemTitle = item(indexPath) {
+            var detailViewController = DetailViewController()
+            detailViewController.title = selectedItemTitle
+            self.navigationController.pushViewController(detailViewController, animated:true)
+        }
+    }
+
+    func item(indexPath: NSIndexPath) -> String? {
+        if let currentItems = self.items {
+            if indexPath.row < 0 || indexPath.row >= currentItems.count {
+                return nil
+            }
+            return currentItems.objectAtIndex(indexPath.row) as? String
+        }
+        return nil
     }
     
     //
     override func didReceiveMemoryWarning()
     {}
 }
-
 

@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Guarded the swift-objects sample against stale table indexes before reading
+  item titles or opening detail views.
 - Guarded the todo-list sample against stale table indexes before reading or
   removing tasks.
 - Guarded the basic note sample against stale table indexes before reading or

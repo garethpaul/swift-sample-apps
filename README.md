@@ -66,7 +66,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   also require the Parse sample save callback to inspect errors before
   reporting completion, the basic note sample to guard stale table indexes
   before reading or writing notes, and the todo-list sample to guard stale
-  table indexes before reading or removing tasks. Xcode project
+  table indexes before reading or removing tasks. The swift-objects sample also
+  guards stale table indexes before reading item titles. Xcode project
   checks reject developer-local framework and bridging-header paths. When
   `xcodebuild` is installed, the `build` target attempts to build each sample
   target for the iOS simulator.
@@ -115,6 +116,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   index guard.
 - See `docs/plans/2026-06-09-todo-index-guard.md` for the todo-list table
   index guard.
+- See `docs/plans/2026-06-09-swift-objects-index-guard.md` for the
+  swift-objects table index guard.
 
 ## Contributing
 

@@ -35,6 +35,7 @@ PARSE_APP_DELEGATE = "parse_example/parse_example/AppDelegate.swift"
 NOTE_LIST_CONTROLLER = "basic-note-taker/basic-note-taker/NoteListViewController.swift"
 TODO_LIST_CONTROLLER = "todo-list/todo-list/FirstViewController.swift"
 TODO_TASK_MANAGER = "todo-list/todo-list/TaskManager.swift"
+SWIFT_OBJECTS_CONTROLLER = "swift-objects-example/swift-objects-example/ViewController.swift"
 
 
 def tracked_files():
@@ -151,6 +152,20 @@ def samples_checks():
             errors.append(f"todo table delete must use guarded task removal in {path}")
         if path == TODO_LIST_CONTROLLER and "if let currentTask = taskMngr.taskAtIndex(indexPath.row)" not in text:
             errors.append(f"todo table cells must optional-bind guarded task lookup in {path}")
+        if path == SWIFT_OBJECTS_CONTROLLER and "return self.items!.count" in text:
+            errors.append(f"swift objects table must not force unwrap items for row counts in {path}")
+        if path == SWIFT_OBJECTS_CONTROLLER and "objectAtIndex(indexPath.row)  as String" in text:
+            errors.append(f"swift objects selection must not read unchecked item indexes in {path}")
+        if path == SWIFT_OBJECTS_CONTROLLER and "objectAtIndex(indexPath.row) as String" in text:
+            errors.append(f"swift objects cells must not read unchecked item indexes in {path}")
+        if path == SWIFT_OBJECTS_CONTROLLER and "func item(indexPath: NSIndexPath) -> String?" not in text:
+            errors.append(f"swift objects item lookup must return nil for stale indexes in {path}")
+        if path == SWIFT_OBJECTS_CONTROLLER and "indexPath.row < 0 || indexPath.row >= currentItems.count" not in text:
+            errors.append(f"swift objects item lookup must guard indexPath.row before reading items in {path}")
+        if path == SWIFT_OBJECTS_CONTROLLER and "if let itemTitle = item(indexPath)" not in text:
+            errors.append(f"swift objects cells must optional-bind guarded item lookup in {path}")
+        if path == SWIFT_OBJECTS_CONTROLLER and "if let selectedItemTitle = item(indexPath)" not in text:
+            errors.append(f"swift objects selection must optional-bind guarded item lookup in {path}")
 
     return errors
 

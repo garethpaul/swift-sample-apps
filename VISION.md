@@ -25,6 +25,7 @@ Priority:
 - Check Parse save callback errors before reporting completion
 - Guard sample table indexes before reading or updating local arrays
 - Guard sample table indexes before removing local rows
+- Guard swift object table indexes before opening detail views
 - Keep Xcode framework and bridging-header paths repo-relative
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`
