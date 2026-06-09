@@ -26,6 +26,7 @@ KNOWN_CREDENTIAL_MARKERS = (
 TOKENIZED_URL_RE = re.compile(r"https?://[^\"'\\s]+[?&]token=[A-Za-z0-9._~-]{12,}")
 SYNC_IMAGE_LOAD_RE = re.compile(r"NSData\s*\(\s*contentsOfURL")
 INSECURE_SWIFT_URL_RE = re.compile(r"NSURL\s*\(\s*string:\s*\"http://")
+SWIFT_PRINT_RE = re.compile(r"\bprint(?:ln)?\s*\(")
 
 
 def tracked_files():
@@ -38,6 +39,16 @@ def tracked_text_files():
         candidate = ROOT / path
         if candidate.name.startswith("README") or candidate.suffix in TEXT_SUFFIXES:
             yield path, candidate.read_text(encoding="utf-8", errors="ignore")
+
+
+def has_active_swift_print(text):
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*"):
+            continue
+        if SWIFT_PRINT_RE.search(stripped):
+            return True
+    return False
 
 
 def hygiene_checks():
@@ -86,6 +97,8 @@ def samples_checks():
             errors.append(f"synchronous network image loading must be removed from {path}")
         if path.endswith(".swift") and INSECURE_SWIFT_URL_RE.search(text):
             errors.append(f"insecure remote URL literals must be replaced with local or HTTPS placeholders in {path}")
+        if path.endswith(".swift") and has_active_swift_print(text):
+            errors.append(f"active Swift print/println debug logging must be removed from {path}")
 
     return errors
 

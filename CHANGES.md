@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-09
+
+- Removed background-switcher loop-index debug logging from view setup.
+- Extended Swift sample checks to reject active `print`/`println` debug logging
+  in tracked Swift sources.
+
 ## 2026-06-08
 
 - Replaced remote HTTP UIWebView requests with local sample HTML and added

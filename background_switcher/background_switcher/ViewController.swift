@@ -43,7 +43,6 @@ class ViewController: UIViewController {
             button.addTarget(self,action: "buttonClicked:", forControlEvents: UIControlEvents.TouchUpInside)
             button.tag = i + 1
             view.addSubview(button)
-            println("\(i)")
             
             
         }
