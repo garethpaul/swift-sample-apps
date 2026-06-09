@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS_PLANS = ROOT / "docs" / "plans"
 CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-swift-sample-apps-baseline.md"
 NOTE_INDEX_PLAN = DOCS_PLANS / "2026-06-09-note-index-guard.md"
+TODO_INDEX_PLAN = DOCS_PLANS / "2026-06-09-todo-index-guard.md"
 SAMPLES = (
     "background_switcher",
     "basic-note-taker",
@@ -32,6 +33,8 @@ LOCAL_XCODE_PATH_RE = re.compile(r"(/Users/|/home/|path = (?:\.\./)+(?:Desktop|D
 FACEBOOK_LOGIN_CONTROLLER = "facebook-login/facebook-login/ViewController.swift"
 PARSE_APP_DELEGATE = "parse_example/parse_example/AppDelegate.swift"
 NOTE_LIST_CONTROLLER = "basic-note-taker/basic-note-taker/NoteListViewController.swift"
+TODO_LIST_CONTROLLER = "todo-list/todo-list/FirstViewController.swift"
+TODO_TASK_MANAGER = "todo-list/todo-list/TaskManager.swift"
 
 
 def tracked_files():
@@ -62,6 +65,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-08-swift-sample-apps-baseline.md is missing")
     if not NOTE_INDEX_PLAN.exists():
         errors.append("docs/plans/2026-06-09-note-index-guard.md is missing")
+    if not TODO_INDEX_PLAN.exists():
+        errors.append("docs/plans/2026-06-09-todo-index-guard.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -132,6 +137,20 @@ def samples_checks():
             errors.append(f"basic note cells must not assign an unchecked note lookup in {path}")
         if path == NOTE_LIST_CONTROLLER and "sselectedNote >= 0 && sselectedNote < notes.count" not in text:
             errors.append(f"basic note editor updates must guard selectedNote before writing notes in {path}")
+        if path == TODO_TASK_MANAGER and "func taskAtIndex(index: Int) -> task?" not in text:
+            errors.append(f"todo task lookup must return nil for stale indexes in {path}")
+        if path == TODO_TASK_MANAGER and "func removeTaskAtIndex(index: Int) -> Bool" not in text:
+            errors.append(f"todo task removal must report whether an index was removed in {path}")
+        if path == TODO_TASK_MANAGER and "index < 0 || index >= tasks.count" not in text:
+            errors.append(f"todo task manager must guard indexes before reading or removing tasks in {path}")
+        if path == TODO_LIST_CONTROLLER and "taskMngr.tasks.removeAtIndex(indexPath.row)" in text:
+            errors.append(f"todo table delete must not remove an unchecked task index in {path}")
+        if path == TODO_LIST_CONTROLLER and "taskMngr.tasks[indexPath.row]" in text:
+            errors.append(f"todo table cells must not read unchecked task indexes in {path}")
+        if path == TODO_LIST_CONTROLLER and "if taskMngr.removeTaskAtIndex(indexPath.row)" not in text:
+            errors.append(f"todo table delete must use guarded task removal in {path}")
+        if path == TODO_LIST_CONTROLLER and "if let currentTask = taskMngr.taskAtIndex(indexPath.row)" not in text:
+            errors.append(f"todo table cells must optional-bind guarded task lookup in {path}")
 
     return errors
 

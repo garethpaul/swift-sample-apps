@@ -25,8 +25,9 @@ class FirstViewController: UIViewController , UITableViewDelegate , UITableViewD
     func tableView(tableView: UITableView!, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath!){
         
         if( editingStyle == UITableViewCellEditingStyle.Delete){
-            taskMngr.tasks.removeAtIndex(indexPath.row)
-            tblTasks.reloadData()
+            if taskMngr.removeTaskAtIndex(indexPath.row) {
+                tblTasks.reloadData()
+            }
         }
     }
     
@@ -41,8 +42,13 @@ class FirstViewController: UIViewController , UITableViewDelegate , UITableViewD
     
     func tableView(tableView: UITableView!, cellForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCell!{
         let cell: UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle , reuseIdentifier: "test")
-        cell.text = taskMngr.tasks[indexPath.row].name
-        cell.detailTextLabel.text = taskMngr.tasks[indexPath.row].desc
+        if let currentTask = taskMngr.taskAtIndex(indexPath.row) {
+            cell.text = currentTask.name
+            cell.detailTextLabel.text = currentTask.desc
+        } else {
+            cell.text = ""
+            cell.detailTextLabel.text = ""
+        }
         return cell
     }
     

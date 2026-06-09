@@ -22,5 +22,19 @@ class TaskManager: NSObject {
         //tasks.append(task(name: name , desc: desc))
         tasks.append(task(name: name, desc: desc))
     }
-}
 
+    func taskAtIndex(index: Int) -> task? {
+        if index < 0 || index >= tasks.count {
+            return nil
+        }
+        return tasks[index]
+    }
+
+    func removeTaskAtIndex(index: Int) -> Bool {
+        if index < 0 || index >= tasks.count {
+            return false
+        }
+        tasks.removeAtIndex(index)
+        return true
+    }
+}
