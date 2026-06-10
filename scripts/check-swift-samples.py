@@ -124,7 +124,11 @@ def hygiene_checks():
         errors.append("Makefile must not build samples that require absent legacy SDK frameworks")
 
     canary_project = (ROOT / "background_switcher/background_switcher.xcodeproj/project.pbxproj").read_text(encoding="utf-8")
-    for contract in ("IPHONEOS_DEPLOYMENT_TARGET = 12.0;", "SWIFT_VERSION = 5.0;"):
+    for contract in (
+        "IPHONEOS_DEPLOYMENT_TARGET = 12.0;",
+        "SWIFT_VERSION = 5.0;",
+        'PRODUCT_BUNDLE_IDENTIFIER = "com.gpj.background-switcher";',
+    ):
         if contract not in canary_project:
             errors.append(f"background switcher project must keep current setting: {contract}")
 

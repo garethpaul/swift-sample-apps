@@ -14,6 +14,7 @@ repository-wide build would fail before evaluating the self-contained samples.
   cancellation and pinned action revisions.
 - Selected `background_switcher` as the explicit self-contained build canary.
 - Migrated that app to Swift 5 syntax and an iOS 12 deployment target.
+- Aligned the app target's bundle identifier with the checked-in Info.plist.
 - Made Makefile paths independent of the caller's working directory.
 - Extended static checks to preserve the canary boundary and avoid attempting
   projects that require missing legacy SDK frameworks.
