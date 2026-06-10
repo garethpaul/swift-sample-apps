@@ -53,9 +53,16 @@ class ViewController: UIViewController, FBLoginViewDelegate {
     
     
     func loginViewFetchedUserInfo(loginView: FBLoginView?, user: AnyObject){
-        var userObj: NSDictionary = user as NSDictionary
-        profilePictureView!.profileID = userObj["id"] as String
-        nameLabel!.text = userObj["name"] as String
+        if let userObj = user as? NSDictionary,
+            profileID = userObj["id"] as? String,
+            name = userObj["name"] as? String {
+                profilePictureView?.profileID = profileID
+                nameLabel?.text = name
+                return
+        }
+        profilePictureView?.profileID = nil
+        nameLabel?.text = ""
+        statusLabel?.text = "Unable to load your Facebook profile."
     }
     
     func loginViewShowingLoggedInUser(loginView: FBLoginView?) {
@@ -87,7 +94,7 @@ class ViewController: UIViewController, FBLoginViewDelegate {
             // the user not being able to complete a task they had initiated in your app
             // (like accessing FB-stored information or posting to Facebook)
         } else if (FBErrorUtility.errorCategoryForError(error) == FBErrorCategory.UserCancelled) {
-            NSLog("user cancelled login")
+            return
             
             // For simplicity, this sample handles other errors with a generic message
             // You can checkout our error handling guide for more detailed information
@@ -98,7 +105,7 @@ class ViewController: UIViewController, FBLoginViewDelegate {
             NSLog("Unexpected error:%@", error)
         }
         
-        var alertView: UIAlertView = UIAlertView(title: alertTitle, message: alertMessage, delegate: nil, cancelButtonTitle: "OK")
+        let alertView: UIAlertView = UIAlertView(title: alertTitle, message: alertMessage, delegate: nil, cancelButtonTitle: "OK")
         
         alertView.show()
         

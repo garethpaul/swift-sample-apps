@@ -71,7 +71,12 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   checks reject developer-local framework and bridging-header paths. When
   `xcodebuild` is installed, the `build` target attempts to build each sample
   target for the iOS simulator.
+- Facebook user profile payloads are optional-cast before UI updates, malformed
+  profiles clear stale values, and user-cancelled login does not show an empty
+  alert.
 - Hygiene checks also require completed canonical plans under `docs/plans`.
+- GitHub Actions runs the same portable hygiene and sample checks on Python
+  3.12 for pushes and pull requests.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 
@@ -118,6 +123,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   index guard.
 - See `docs/plans/2026-06-09-swift-objects-index-guard.md` for the
   swift-objects table index guard.
+- See `docs/plans/2026-06-10-facebook-payload-and-ci.md` for Facebook payload
+  validation, cancellation behavior, and the CI gate.
 
 ## Contributing
 

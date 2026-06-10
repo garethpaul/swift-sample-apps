@@ -11,6 +11,8 @@ DOCS_PLANS = ROOT / "docs" / "plans"
 CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-swift-sample-apps-baseline.md"
 NOTE_INDEX_PLAN = DOCS_PLANS / "2026-06-09-note-index-guard.md"
 TODO_INDEX_PLAN = DOCS_PLANS / "2026-06-09-todo-index-guard.md"
+FACEBOOK_PAYLOAD_PLAN = DOCS_PLANS / "2026-06-10-facebook-payload-and-ci.md"
+WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 SAMPLES = (
     "background_switcher",
     "basic-note-taker",
@@ -68,6 +70,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-09-note-index-guard.md is missing")
     if not TODO_INDEX_PLAN.exists():
         errors.append("docs/plans/2026-06-09-todo-index-guard.md is missing")
+    if not FACEBOOK_PAYLOAD_PLAN.exists():
+        errors.append("docs/plans/2026-06-10-facebook-payload-and-ci.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -80,6 +84,19 @@ def hygiene_checks():
     for path in tracked_files():
         if "/xcuserdata/" in path or path.endswith(".xcuserstate"):
             errors.append(f"tracked Xcode user state should be removed: {path}")
+
+    workflow = WORKFLOW.read_text(encoding="utf-8") if WORKFLOW.exists() else ""
+    for contract in (
+        "permissions:",
+        "contents: read",
+        "timeout-minutes: 10",
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+        'python-version: "3.12"',
+        "run: make check",
+    ):
+        if contract not in workflow:
+            errors.append(f"GitHub Actions workflow must keep contract: {contract}")
     return errors
 
 
@@ -118,6 +135,17 @@ def samples_checks():
             errors.append(f"Facebook login error handling must not shadow the delegate NSError in {path}")
         if path == FACEBOOK_LOGIN_CONTROLLER and "error!" in text:
             errors.append(f"Facebook login error handling must not force-unwrap NSError values in {path}")
+        if path == FACEBOOK_LOGIN_CONTROLLER:
+            for contract in (
+                'profileID = userObj["id"] as? String',
+                'name = userObj["name"] as? String',
+                'statusLabel?.text = "Unable to load your Facebook profile."',
+                "FBErrorCategory.UserCancelled) {\n            return",
+            ):
+                if contract not in text:
+                    errors.append(f"Facebook login payload contract is missing from {path}: {contract}")
+            if 'userObj["id"] as String' in text or 'userObj["name"] as String' in text:
+                errors.append(f"Facebook user payload fields must not be force-cast in {path}")
         if path == PARSE_APP_DELEGATE and 'NSLog("Done")' in text:
             errors.append(f"Parse save callback must not log success before checking errors in {path}")
         if path == PARSE_APP_DELEGATE and "if err != nil" not in text:

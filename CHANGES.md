@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-10
+
+- Rejected malformed Facebook profile payloads without forced-cast crashes.
+- Stopped user-cancelled Facebook login from displaying an empty alert.
+- Added a least-privilege Python 3.12 GitHub Actions verification gate.
+
 ## 2026-06-09
 
 - Guarded the swift-objects sample against stale table indexes before reading

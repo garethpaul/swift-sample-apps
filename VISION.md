@@ -22,6 +22,7 @@ Priority:
 - Avoid ad hoc Swift debug prints in archive samples
 - Preserve delegate-supplied SDK errors instead of shadowing or force-unwrapping
   them
+- Treat Facebook profile payloads as optional and ignore cancelled logins
 - Check Parse save callback errors before reporting completion
 - Guard sample table indexes before reading or updating local arrays
 - Guard sample table indexes before removing local rows
