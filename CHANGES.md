@@ -2,6 +2,8 @@
 
 ## 2026-06-10
 
+- Replaced the background switcher's fixed 320x568 canvas with a flexible
+  view-bounds layout that covers current devices and rotations.
 - Added a fixed macOS 15 CI job that compiles the self-contained background
   switcher sample for a generic iOS Simulator.
 - Migrated background switcher to Swift 5 and iOS 12 while keeping Parse and

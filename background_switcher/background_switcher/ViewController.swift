@@ -16,16 +16,16 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        let width: CGFloat = 320
-        let height: CGFloat = 568
         backgroundDict = [
             "Background1": UIColor(red: 0.18, green: 0.33, blue: 0.58, alpha: 1.0),
             "Background2": UIColor(red: 0.64, green: 0.20, blue: 0.32, alpha: 1.0)
         ]
         let buttonTitles = ["Background 1", "Background 2"]
-        let contentView = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        let contentView = UIView(frame: view.bounds)
+        contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.view.addSubview(contentView)
-        imageView = UIImageView(frame: contentView.frame)
+        imageView = UIImageView(frame: contentView.bounds)
+        imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.backgroundColor = backgroundDict["Background1"]
         
         contentView.addSubview(imageView)
@@ -34,7 +34,8 @@ class ViewController: UIViewController {
             
             let button = UIButton(type: .system)
             button.frame = CGRect(x: 0, y: 0, width: 200, height: 20)
-            button.center = CGPoint(x: contentView.center.x, y: CGFloat(100 + i * 50))
+            button.center = CGPoint(x: contentView.bounds.midX, y: CGFloat(100 + i * 50))
+            button.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]
             button.setTitle(buttonTitles[i], for: .normal)
             button.setTitleColor(.white, for: .normal)
             button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)

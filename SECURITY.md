@@ -34,6 +34,8 @@ Helpful reports include:
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 - GitHub Actions uses read-only permissions and fixed Ubuntu 24.04/macOS 15
   runners; only the self-contained background-switcher sample is compiled.
+- The compiled canary derives its drawing canvas from local view bounds and
+  performs no remote image loading or device-specific frame assumptions.
 
 ## Mobile Privacy Notes
 

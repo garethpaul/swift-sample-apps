@@ -31,6 +31,7 @@ Priority:
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`
 - Keep the background-switcher Swift 5 build canary green on current Xcode
+- Keep the background-switcher canvas responsive across current view sizes
 
 Next priorities:
 

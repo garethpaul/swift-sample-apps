@@ -74,6 +74,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   samples remain static-only because their legacy SDK frameworks are absent.
 - GitHub Actions runs portable checks on Ubuntu 24.04 and the Swift 5/iOS 12
   background-switcher build canary on macOS 15.
+- The background-switcher canvas and image follow the view bounds on different
+  simulator sizes and rotations, while its controls remain centered.
 - Facebook user profile payloads are optional-cast before UI updates, malformed
   profiles clear stale values, and user-cancelled login does not show an empty
   alert.
@@ -128,6 +130,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   swift-objects table index guard.
 - See `docs/plans/2026-06-10-facebook-payload-and-ci.md` for Facebook payload
   validation, cancellation behavior, and the CI gate.
+- See `docs/plans/2026-06-10-responsive-background-switcher.md` for the
+  responsive canary layout contract.
 
 ## Contributing
 

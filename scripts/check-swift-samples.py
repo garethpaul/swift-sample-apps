@@ -13,6 +13,7 @@ NOTE_INDEX_PLAN = DOCS_PLANS / "2026-06-09-note-index-guard.md"
 TODO_INDEX_PLAN = DOCS_PLANS / "2026-06-09-todo-index-guard.md"
 FACEBOOK_PAYLOAD_PLAN = DOCS_PLANS / "2026-06-10-facebook-payload-and-ci.md"
 BUILD_CANARY_PLAN = DOCS_PLANS / "2026-06-10-background-switcher-build.md"
+RESPONSIVE_CANARY_PLAN = DOCS_PLANS / "2026-06-10-responsive-background-switcher.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 SAMPLES = (
     "background_switcher",
@@ -75,6 +76,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-10-facebook-payload-and-ci.md is missing")
     if not BUILD_CANARY_PLAN.exists():
         errors.append("docs/plans/2026-06-10-background-switcher-build.md is missing")
+    if not RESPONSIVE_CANARY_PLAN.exists():
+        errors.append("docs/plans/2026-06-10-responsive-background-switcher.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -136,6 +139,18 @@ def hygiene_checks():
     for contract in ("for i in buttonTitles.indices", "#selector(buttonClicked(_:))", "UIView.animate(withDuration: 0.4"):
         if contract not in canary_source:
             errors.append(f"background switcher must keep Swift 5 source contract: {contract}")
+    if "width: CGFloat = 320" in canary_source or "height: CGFloat = 568" in canary_source:
+        errors.append("background switcher must not use a fixed legacy device canvas")
+    for contract in (
+        "UIView(frame: view.bounds)",
+        "UIImageView(frame: contentView.bounds)",
+        "contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]",
+        "imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]",
+        "button.center = CGPoint(x: contentView.bounds.midX",
+        "button.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]",
+    ):
+        if contract not in canary_source:
+            errors.append(f"background switcher responsive layout contract is missing: {contract}")
     return errors
 
 
