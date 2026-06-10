@@ -69,8 +69,11 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   table indexes before reading or removing tasks. The swift-objects sample also
   guards stale table indexes before reading item titles. Xcode project
   checks reject developer-local framework and bridging-header paths. When
-  `xcodebuild` is installed, the `build` target attempts to build each sample
-  target for the iOS simulator.
+  `xcodebuild` is installed, the `build` target compiles the self-contained
+  `background_switcher` canary for a generic iOS Simulator. Parse and Facebook
+  samples remain static-only because their legacy SDK frameworks are absent.
+- GitHub Actions runs portable checks on Ubuntu 24.04 and the Swift 5/iOS 12
+  background-switcher build canary on macOS 15.
 - Facebook user profile payloads are optional-cast before UI updates, malformed
   profiles clear stale values, and user-cancelled login does not show an empty
   alert.

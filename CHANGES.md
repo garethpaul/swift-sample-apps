@@ -2,6 +2,11 @@
 
 ## 2026-06-10
 
+- Added a fixed macOS 15 CI job that compiles the self-contained background
+  switcher sample for a generic iOS Simulator.
+- Migrated background switcher to Swift 5 and iOS 12 while keeping Parse and
+  Facebook samples static-only because their legacy frameworks are absent.
+- Fixed portable CI to Ubuntu 24.04 and made Make targets root-independent.
 - Rejected malformed Facebook profile payloads without forced-cast crashes.
 - Stopped user-cancelled Facebook login from displaying an empty alert.
 - Added a least-privilege Python 3.12 GitHub Actions verification gate.

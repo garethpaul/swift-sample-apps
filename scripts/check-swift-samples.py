@@ -12,6 +12,7 @@ CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-swift-sample-apps-baseline.md"
 NOTE_INDEX_PLAN = DOCS_PLANS / "2026-06-09-note-index-guard.md"
 TODO_INDEX_PLAN = DOCS_PLANS / "2026-06-09-todo-index-guard.md"
 FACEBOOK_PAYLOAD_PLAN = DOCS_PLANS / "2026-06-10-facebook-payload-and-ci.md"
+BUILD_CANARY_PLAN = DOCS_PLANS / "2026-06-10-background-switcher-build.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 SAMPLES = (
     "background_switcher",
@@ -72,6 +73,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-09-todo-index-guard.md is missing")
     if not FACEBOOK_PAYLOAD_PLAN.exists():
         errors.append("docs/plans/2026-06-10-facebook-payload-and-ci.md is missing")
+    if not BUILD_CANARY_PLAN.exists():
+        errors.append("docs/plans/2026-06-10-background-switcher-build.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -89,14 +92,46 @@ def hygiene_checks():
     for contract in (
         "permissions:",
         "contents: read",
-        "timeout-minutes: 10",
+        "concurrency:",
+        "cancel-in-progress: true",
+        "contract:",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 5",
+        "build:",
+        "runs-on: macos-15",
+        "timeout-minutes: 15",
+        "workflow_dispatch:",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
         "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
         'python-version: "3.12"',
         "run: make check",
+        "run: make build",
     ):
         if contract not in workflow:
             errors.append(f"GitHub Actions workflow must keep contract: {contract}")
+
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    for contract in (
+        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
+        "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
+        "-target background_switcher",
+        "generic/platform=iOS Simulator",
+        "CODE_SIGNING_ALLOWED=NO",
+    ):
+        if contract not in makefile:
+            errors.append(f"Makefile must keep background switcher build contract: {contract}")
+    if "for project in */*.xcodeproj" in makefile:
+        errors.append("Makefile must not build samples that require absent legacy SDK frameworks")
+
+    canary_project = (ROOT / "background_switcher/background_switcher.xcodeproj/project.pbxproj").read_text(encoding="utf-8")
+    for contract in ("IPHONEOS_DEPLOYMENT_TARGET = 12.0;", "SWIFT_VERSION = 5.0;"):
+        if contract not in canary_project:
+            errors.append(f"background switcher project must keep current setting: {contract}")
+
+    canary_source = (ROOT / "background_switcher/background_switcher/ViewController.swift").read_text(encoding="utf-8")
+    for contract in ("for i in buttonTitles.indices", "#selector(buttonClicked(_:))", "UIView.animate(withDuration: 0.4"):
+        if contract not in canary_source:
+            errors.append(f"background switcher must keep Swift 5 source contract: {contract}")
     return errors
 
 
