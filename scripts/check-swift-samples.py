@@ -12,7 +12,40 @@ CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-swift-sample-apps-baseline.md"
 NOTE_INDEX_PLAN = DOCS_PLANS / "2026-06-09-note-index-guard.md"
 TODO_INDEX_PLAN = DOCS_PLANS / "2026-06-09-todo-index-guard.md"
 FACEBOOK_PAYLOAD_PLAN = DOCS_PLANS / "2026-06-10-facebook-payload-and-ci.md"
+CI_HARDENING_PLAN = DOCS_PLANS / "2026-06-12-portable-ci-hardening.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
+EXPECTED_WORKFLOW = """name: Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.12"
+      - name: Run portable verification
+        run: make check
+"""
 SAMPLES = (
     "background_switcher",
     "basic-note-taker",
@@ -72,6 +105,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-09-todo-index-guard.md is missing")
     if not FACEBOOK_PAYLOAD_PLAN.exists():
         errors.append("docs/plans/2026-06-10-facebook-payload-and-ci.md is missing")
+    if not CI_HARDENING_PLAN.exists():
+        errors.append("docs/plans/2026-06-12-portable-ci-hardening.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -85,18 +120,22 @@ def hygiene_checks():
         if "/xcuserdata/" in path or path.endswith(".xcuserstate"):
             errors.append(f"tracked Xcode user state should be removed: {path}")
 
+    workflow_files = sorted((ROOT / ".github" / "workflows").glob("*.y*ml"))
+    if workflow_files != [WORKFLOW]:
+        errors.append("repository must keep exactly one reviewed GitHub Actions workflow")
     workflow = WORKFLOW.read_text(encoding="utf-8") if WORKFLOW.exists() else ""
+    if workflow != EXPECTED_WORKFLOW:
+        errors.append("GitHub Actions workflow must match the reviewed portable verification contract")
+
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
     for contract in (
-        "permissions:",
-        "contents: read",
-        "timeout-minutes: 10",
-        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
-        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
-        'python-version: "3.12"',
-        "run: make check",
+        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
+        '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
+        '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
+        '"$(ROOT)"/*/*.xcodeproj',
     ):
-        if contract not in workflow:
-            errors.append(f"GitHub Actions workflow must keep contract: {contract}")
+        if contract not in makefile:
+            errors.append(f"Makefile must keep root-independent contract: {contract}")
     return errors
 
 

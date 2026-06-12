@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-12
+
+- Fixed portable CI to Ubuntu 24.04, disabled persisted checkout credentials,
+  added concurrency cancellation/manual dispatch, and made Make targets
+  independent of the caller's working directory.
+
 ## 2026-06-10
 
 - Rejected malformed Facebook profile payloads without forced-cast crashes.

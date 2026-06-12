@@ -2,16 +2,17 @@
 
 PYTHON ?= python3
 XCODEBUILD ?= xcodebuild
+ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 lint:
-	$(PYTHON) scripts/check-swift-samples.py --mode hygiene
+	$(PYTHON) "$(ROOT)/scripts/check-swift-samples.py" --mode hygiene
 
 test:
-	$(PYTHON) scripts/check-swift-samples.py --mode samples
+	$(PYTHON) "$(ROOT)/scripts/check-swift-samples.py" --mode samples
 
 build: lint
 	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \
-		for project in */*.xcodeproj; do \
+		for project in "$(ROOT)"/*/*.xcodeproj; do \
 			target=$$(basename "$$project" .xcodeproj); \
 			"$(XCODEBUILD)" -project "$$project" -target "$$target" -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build; \
 		done; \

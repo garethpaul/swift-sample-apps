@@ -76,7 +76,11 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   alert.
 - Hygiene checks also require completed canonical plans under `docs/plans`.
 - GitHub Actions runs the same portable hygiene and sample checks on Python
-  3.12 for pushes and pull requests.
+  3.12 for pushes and pull requests on fixed Ubuntu 24.04, with immutable
+  actions, read-only permissions, disabled checkout credential persistence,
+  concurrency cancellation, and bounded runtime.
+- Makefile verification is rooted at the repository path and can be invoked
+  from an external working directory.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 

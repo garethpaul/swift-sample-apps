@@ -32,6 +32,8 @@ Helpful reports include:
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - Review found secret-like configuration names that require careful review before use; changes in those areas should receive security-focused review before merge.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
+- Portable GitHub Actions verification uses immutable actions, read-only
+  permissions, fixed Ubuntu 24.04, and credential-free checkout.
 
 ## Mobile Privacy Notes
 
