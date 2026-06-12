@@ -15,6 +15,7 @@ FACEBOOK_PAYLOAD_PLAN = DOCS_PLANS / "2026-06-10-facebook-payload-and-ci.md"
 CI_HARDENING_PLAN = DOCS_PLANS / "2026-06-12-portable-ci-hardening.md"
 BUILD_CANARY_PLAN = DOCS_PLANS / "2026-06-10-background-switcher-build.md"
 RESPONSIVE_CANARY_PLAN = DOCS_PLANS / "2026-06-10-responsive-background-switcher.md"
+BACKGROUND_SELECTION_PLAN = DOCS_PLANS / "2026-06-12-latest-background-selection.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -86,6 +87,7 @@ NOTE_LIST_CONTROLLER = "basic-note-taker/basic-note-taker/NoteListViewController
 TODO_LIST_CONTROLLER = "todo-list/todo-list/FirstViewController.swift"
 TODO_TASK_MANAGER = "todo-list/todo-list/TaskManager.swift"
 SWIFT_OBJECTS_CONTROLLER = "swift-objects-example/swift-objects-example/ViewController.swift"
+BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewController.swift"
 
 
 def tracked_files():
@@ -126,6 +128,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-10-background-switcher-build.md is missing")
     if not RESPONSIVE_CANARY_PLAN.exists():
         errors.append("docs/plans/2026-06-10-responsive-background-switcher.md is missing")
+    if not BACKGROUND_SELECTION_PLAN.exists():
+        errors.append("docs/plans/2026-06-12-latest-background-selection.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -171,7 +175,7 @@ def hygiene_checks():
             errors.append(f"background switcher project must keep current setting: {contract}")
 
     canary_source = (ROOT / "background_switcher/background_switcher/ViewController.swift").read_text(encoding="utf-8")
-    for contract in ("for i in buttonTitles.indices", "#selector(buttonClicked(_:))", "UIView.animate(withDuration: 0.4"):
+    for contract in ("for i in buttonTitles.indices", "#selector(buttonClicked(_:))", "UIView.transition("):
         if contract not in canary_source:
             errors.append(f"background switcher must keep Swift 5 source contract: {contract}")
     if "width: CGFloat = 320" in canary_source or "height: CGFloat = 568" in canary_source:
@@ -283,6 +287,19 @@ def samples_checks():
             errors.append(f"swift objects cells must optional-bind guarded item lookup in {path}")
         if path == SWIFT_OBJECTS_CONTROLLER and "if let selectedItemTitle = item(indexPath)" not in text:
             errors.append(f"swift objects selection must optional-bind guarded item lookup in {path}")
+        if path == BACKGROUND_SWITCHER_CONTROLLER:
+            if "UIView.animate(withDuration: 0.4" in text or "self.imageView.alpha =" in text:
+                errors.append(f"background selection must not use delayed two-stage alpha animation in {path}")
+            if "UIView.transition(" not in text or "with: imageView" not in text:
+                errors.append(f"background selection must transition the image view directly in {path}")
+            if "options: [.transitionCrossDissolve, .beginFromCurrentState, .allowUserInteraction]" not in text:
+                errors.append(f"background transition must remain interruptible and interactive in {path}")
+            if "duration: 0.4" not in text:
+                errors.append(f"background transition must preserve the sample duration in {path}")
+            if "animations: {\n                    self.imageView.backgroundColor = backgroundColor\n                },\n                completion: nil" not in text:
+                errors.append(f"background transition must assign color without a delayed completion write in {path}")
+            if 'if let backgroundColor = self.backgroundDict[imageSelector]' not in text:
+                errors.append(f"background selection must preserve guarded color lookup in {path}")
 
     return errors
 

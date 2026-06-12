@@ -2,6 +2,8 @@
 
 ## 2026-06-12
 
+- Replaced queued background fade completions with one interruptible
+  cross-dissolve so rapid taps preserve the latest selected color.
 - Fixed portable CI to Ubuntu 24.04, disabled persisted checkout credentials,
   added concurrency cancellation/manual dispatch, and made Make targets
   independent of the caller's working directory.
