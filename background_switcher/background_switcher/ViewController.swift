@@ -7,9 +7,6 @@
 //
 
 import UIKit
-import QuartzCore
-
-
 class ViewController: UIViewController {
     
     var imageView:UIImageView = UIImageView()
@@ -19,46 +16,49 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        var width:CGFloat = 320
-        var height:CGFloat = 568
         backgroundDict = [
             "Background1": UIColor(red: 0.18, green: 0.33, blue: 0.58, alpha: 1.0),
             "Background2": UIColor(red: 0.64, green: 0.20, blue: 0.32, alpha: 1.0)
         ]
-        var buttonTitles = ["Background 1", "Background 2"]
-        var view:UIView = UIView(frame: CGRectMake(0,0,width,height))
-        self.view.addSubview(view)
-        imageView = UIImageView(frame: view.frame)
+        let buttonTitles = ["Background 1", "Background 2"]
+        let contentView = UIView(frame: view.bounds)
+        contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        self.view.addSubview(contentView)
+        imageView = UIImageView(frame: contentView.bounds)
+        imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.backgroundColor = backgroundDict["Background1"]
         
-        view.addSubview(imageView)
+        contentView.addSubview(imageView)
         
-        for i in 0..buttonTitles.count {
+        for i in buttonTitles.indices {
             
-            var button:UIButton = UIButton.buttonWithType(UIButtonType.System) as UIButton
-            button.frame = CGRectMake(0, 0, 200, 20)
-            button.center = CGPointMake(view.center.x, CGFloat(100+i*50))
-            button.setTitle(buttonTitles[i], forState: UIControlState.Normal)
-            button.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-            button.addTarget(self,action: "buttonClicked:", forControlEvents: UIControlEvents.TouchUpInside)
+            let button = UIButton(type: .system)
+            button.frame = CGRect(x: 0, y: 0, width: 200, height: 20)
+            button.center = CGPoint(x: contentView.bounds.midX, y: CGFloat(100 + i * 50))
+            button.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]
+            button.setTitle(buttonTitles[i], for: .normal)
+            button.setTitleColor(.white, for: .normal)
+            button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)
             button.tag = i + 1
-            view.addSubview(button)
+            contentView.addSubview(button)
             
             
         }
         
     }
     
-    func buttonClicked(sender:UIButton) {
-        var button:UIButton = sender
-        var imageSelector:String = "Background\(button.tag)"
+    @objc private func buttonClicked(_ sender: UIButton) {
+        let imageSelector = "Background\(sender.tag)"
         if let backgroundColor = self.backgroundDict[imageSelector] {
         
-            UIView.animateWithDuration(0.4, animations: {self.imageView.alpha=0},
-                completion: {
-                    _ in self.imageView.backgroundColor = backgroundColor
-                    UIView.animateWithDuration(0.4, animations: {self.imageView.alpha=1})
-                })
+            UIView.animate(withDuration: 0.4, animations: {
+                self.imageView.alpha = 0
+            }, completion: { _ in
+                self.imageView.backgroundColor = backgroundColor
+                UIView.animate(withDuration: 0.4) {
+                    self.imageView.alpha = 1
+                }
+            })
         }
     }
     

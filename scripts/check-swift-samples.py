@@ -13,6 +13,8 @@ NOTE_INDEX_PLAN = DOCS_PLANS / "2026-06-09-note-index-guard.md"
 TODO_INDEX_PLAN = DOCS_PLANS / "2026-06-09-todo-index-guard.md"
 FACEBOOK_PAYLOAD_PLAN = DOCS_PLANS / "2026-06-10-facebook-payload-and-ci.md"
 CI_HARDENING_PLAN = DOCS_PLANS / "2026-06-12-portable-ci-hardening.md"
+BUILD_CANARY_PLAN = DOCS_PLANS / "2026-06-10-background-switcher-build.md"
+RESPONSIVE_CANARY_PLAN = DOCS_PLANS / "2026-06-10-responsive-background-switcher.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -31,20 +33,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify:
+  contract:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Check out repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.12"
       - name: Run portable verification
         run: make check
+
+  build:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build background switcher canary
+        run: make build
 """
 SAMPLES = (
     "background_switcher",
@@ -107,6 +122,10 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-10-facebook-payload-and-ci.md is missing")
     if not CI_HARDENING_PLAN.exists():
         errors.append("docs/plans/2026-06-12-portable-ci-hardening.md is missing")
+    if not BUILD_CANARY_PLAN.exists():
+        errors.append("docs/plans/2026-06-10-background-switcher-build.md is missing")
+    if not RESPONSIVE_CANARY_PLAN.exists():
+        errors.append("docs/plans/2026-06-10-responsive-background-switcher.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -132,10 +151,41 @@ def hygiene_checks():
         "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
         '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
         '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
-        '"$(ROOT)"/*/*.xcodeproj',
+        "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
+        "-target background_switcher",
+        "generic/platform=iOS Simulator",
+        "CODE_SIGNING_ALLOWED=NO",
     ):
         if contract not in makefile:
-            errors.append(f"Makefile must keep root-independent contract: {contract}")
+            errors.append(f"Makefile must keep background switcher build contract: {contract}")
+    if "for project in */*.xcodeproj" in makefile:
+        errors.append("Makefile must not build samples that require absent legacy SDK frameworks")
+
+    canary_project = (ROOT / "background_switcher/background_switcher.xcodeproj/project.pbxproj").read_text(encoding="utf-8")
+    for contract in (
+        "IPHONEOS_DEPLOYMENT_TARGET = 12.0;",
+        "SWIFT_VERSION = 5.0;",
+        'PRODUCT_BUNDLE_IDENTIFIER = "com.gpj.background-switcher";',
+    ):
+        if contract not in canary_project:
+            errors.append(f"background switcher project must keep current setting: {contract}")
+
+    canary_source = (ROOT / "background_switcher/background_switcher/ViewController.swift").read_text(encoding="utf-8")
+    for contract in ("for i in buttonTitles.indices", "#selector(buttonClicked(_:))", "UIView.animate(withDuration: 0.4"):
+        if contract not in canary_source:
+            errors.append(f"background switcher must keep Swift 5 source contract: {contract}")
+    if "width: CGFloat = 320" in canary_source or "height: CGFloat = 568" in canary_source:
+        errors.append("background switcher must not use a fixed legacy device canvas")
+    for contract in (
+        "UIView(frame: view.bounds)",
+        "UIImageView(frame: contentView.bounds)",
+        "contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]",
+        "imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]",
+        "button.center = CGPoint(x: contentView.bounds.midX",
+        "button.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]",
+    ):
+        if contract not in canary_source:
+            errors.append(f"background switcher responsive layout contract is missing: {contract}")
     return errors
 
 

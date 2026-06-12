@@ -8,6 +8,15 @@
 
 ## 2026-06-10
 
+- Replaced the background switcher's fixed 320x568 canvas with a flexible
+  view-bounds layout that covers current devices and rotations.
+- Added a fixed macOS 15 CI job that compiles the self-contained background
+  switcher sample for a generic iOS Simulator.
+- Migrated background switcher to Swift 5 and iOS 12 while keeping Parse and
+  Facebook samples static-only because their legacy frameworks are absent.
+- Fixed portable CI to Ubuntu 24.04 and made Make targets root-independent.
+- Aligned the background-switcher product bundle identifier with its Info.plist
+  to remove conflicting Xcode metadata.
 - Rejected malformed Facebook profile payloads without forced-cast crashes.
 - Stopped user-cancelled Facebook login from displaying an empty alert.
 - Added a least-privilege Python 3.12 GitHub Actions verification gate.

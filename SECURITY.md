@@ -33,7 +33,10 @@ Helpful reports include:
 - Review found secret-like configuration names that require careful review before use; changes in those areas should receive security-focused review before merge.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 - Portable GitHub Actions verification uses immutable actions, read-only
-  permissions, fixed Ubuntu 24.04, and credential-free checkout.
+  permissions, credential-free checkout, and fixed Ubuntu 24.04/macOS 15
+  runners; only the self-contained background-switcher sample is compiled.
+- The compiled canary derives its drawing canvas from local view bounds and
+  performs no remote image loading or device-specific frame assumptions.
 
 ## Mobile Privacy Notes
 
