@@ -2,6 +2,8 @@
 
 ## 2026-06-13
 
+- Added exclusive background selection semantics and the selected accessibility
+  trait after successful color lookup.
 - Replaced fixed 20-point background button frames with a safe-area-aware
   vertical stack, 44-point minimum targets, padding, and Dynamic Type labels.
 

@@ -1,6 +1,6 @@
 # Background Selection Semantics
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -44,12 +44,28 @@ ordering, trait, exclusivity, documentation, and plan-status mutations.
 
 ## Verification
 
-- Focused source contract and full `make check` locally and from outside the
-  repository root.
-- Hosted macOS 15 background_switcher canary build through the pull-request
-  event.
-- Focused hostile mutations plus workflow YAML, plist, asset JSON, Python
-  checker, secret, artifact, and `git diff --check` audits.
+- `python3 scripts/check-swift-samples.py --mode samples` passed locally.
+- The first full `make check` reached the plan-completion gate and correctly
+  rejected this plan while its status was still Planned.
+- Completed-plan `make check` passed locally and from `/tmp`; static checks
+  passed and reported that local `xcodebuild` is unavailable.
+- Seven focused mutations were rejected: missing retained storage, missing
+  append, missing initial state, selection before lookup, nonexclusive state,
+  missing selected trait, and regressed plan status.
+- Parsed 1 workflow YAML file, 14 plists, and 14 JSON files; Python syntax,
+  diff whitespace, generated-artifact, and intended-diff secret audits passed.
+- Plan-aware review found no actionable findings. Browser testing is not
+  applicable because this is a native UIKit sample without a web route.
+- The hosted macOS 15 background-switcher build remains the native compilation
+  authority and will be recorded on the exact pushed head.
+
+## Work Completed
+
+- Retained each background button and initialized Background 1 as selected.
+- Updated selection only inside the existing successful color-lookup branch.
+- Kept `isSelected` and the `.selected` accessibility trait exclusive and in
+  sync across both controls.
+- Added static contracts and user-facing documentation for the behavior.
 
 ## Scope Boundary
 

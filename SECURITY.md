@@ -41,6 +41,8 @@ Helpful reports include:
   rapid local UI actions deterministic without introducing external state.
 - Background controls use safe-area constraints and minimum touch targets
   instead of hard-coded positions that can become unreachable or undersized.
+- Background selection semantics expose only the successfully applied local
+  color choice and do not widen the sample's data or permission surface.
 
 ## Mobile Privacy Notes
 
