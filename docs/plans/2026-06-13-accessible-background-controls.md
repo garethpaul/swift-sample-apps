@@ -1,6 +1,6 @@
 # Accessible Background Controls
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -80,3 +80,30 @@ accessible controls rather than carrying legacy manual button geometry.
 - Static contracts can verify the intended accessibility and layout structure;
   actual VoiceOver, Dynamic Type rendering, rotation, and touch interaction
   still require hosted or local Apple tooling beyond compilation.
+
+## Work Completed
+
+- Replaced manual button frames and hard-coded centers with a vertical stack
+  constrained to the content view's safe area.
+- Preserved the two titles, tags, order, action, colors, transition behavior,
+  responsive background layer, deployment target, and sample structure.
+- Added 44-point minimum heights, content padding, preferred body fonts,
+  Dynamic Type scaling, and multiline centered labels.
+- Extended fail-closed source contracts and maintenance documentation without
+  changing the five static-only legacy targets.
+
+## Verification
+
+- Python checker compilation and the focused sample contracts passed.
+- `git diff --check` passed before the full gate.
+- Local `xcodebuild` was unavailable on Linux; native compilation remains a
+  required hosted macOS canary result rather than a local claim.
+- `make check` passed the completed-plan, hygiene, and sample contracts with
+  the expected Linux-only native-build skip.
+- The same full gate passed from an external working directory.
+- Seven focused hostile mutation categories were rejected: restored manual
+  geometry, removed safe-area anchoring, undersized targets, removed Dynamic
+  Type or multiline support, missing padding, and bypassed stack arrangement.
+- Plan-aware correctness, accessibility-contract, testing, maintainability,
+  and deployment-floor review removed a compact-width constraint conflict and
+  found no remaining actionable issue.

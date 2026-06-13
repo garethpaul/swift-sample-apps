@@ -16,6 +16,7 @@ CI_HARDENING_PLAN = DOCS_PLANS / "2026-06-12-portable-ci-hardening.md"
 BUILD_CANARY_PLAN = DOCS_PLANS / "2026-06-10-background-switcher-build.md"
 RESPONSIVE_CANARY_PLAN = DOCS_PLANS / "2026-06-10-responsive-background-switcher.md"
 BACKGROUND_SELECTION_PLAN = DOCS_PLANS / "2026-06-12-latest-background-selection.md"
+ACCESSIBLE_BACKGROUND_CONTROLS_PLAN = DOCS_PLANS / "2026-06-13-accessible-background-controls.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -130,6 +131,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-10-responsive-background-switcher.md is missing")
     if not BACKGROUND_SELECTION_PLAN.exists():
         errors.append("docs/plans/2026-06-12-latest-background-selection.md is missing")
+    if not ACCESSIBLE_BACKGROUND_CONTROLS_PLAN.exists():
+        errors.append("docs/plans/2026-06-13-accessible-background-controls.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -185,11 +188,24 @@ def hygiene_checks():
         "UIImageView(frame: contentView.bounds)",
         "contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]",
         "imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]",
-        "button.center = CGPoint(x: contentView.bounds.midX",
-        "button.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]",
+        "let buttonStack = UIStackView()",
+        "buttonStack.translatesAutoresizingMaskIntoConstraints = false",
+        "let safeArea = contentView.safeAreaLayoutGuide",
+        "buttonStack.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor)",
+        "buttonStack.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor)",
+        "buttonStack.leadingAnchor.constraint(greaterThanOrEqualTo: safeArea.leadingAnchor, constant: 20)",
+        "buttonStack.trailingAnchor.constraint(lessThanOrEqualTo: safeArea.trailingAnchor, constant: -20)",
+        "button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)",
+        "button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)",
+        "button.titleLabel?.adjustsFontForContentSizeCategory = true",
+        "button.titleLabel?.numberOfLines = 0",
+        "button.titleLabel?.textAlignment = .center",
+        "buttonStack.addArrangedSubview(button)",
     ):
         if contract not in canary_source:
             errors.append(f"background switcher responsive layout contract is missing: {contract}")
+    if "button.frame =" in canary_source or "button.center =" in canary_source:
+        errors.append("background switcher controls must not use manual frame or center geometry")
     return errors
 
 
@@ -300,6 +316,8 @@ def samples_checks():
                 errors.append(f"background transition must assign color without a delayed completion write in {path}")
             if 'if let backgroundColor = self.backgroundDict[imageSelector]' not in text:
                 errors.append(f"background selection must preserve guarded color lookup in {path}")
+            if "button.contentEdgeInsets = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)" not in text:
+                errors.append(f"background controls must preserve padded Dynamic Type targets in {path}")
 
     return errors
 

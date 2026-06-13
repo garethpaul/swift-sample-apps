@@ -29,21 +29,40 @@ class ViewController: UIViewController {
         imageView.backgroundColor = backgroundDict["Background1"]
         
         contentView.addSubview(imageView)
+        let buttonStack = UIStackView()
+        buttonStack.axis = .vertical
+        buttonStack.alignment = .fill
+        buttonStack.spacing = 8
+        buttonStack.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(buttonStack)
         
         for i in buttonTitles.indices {
             
             let button = UIButton(type: .system)
-            button.frame = CGRect(x: 0, y: 0, width: 200, height: 20)
-            button.center = CGPoint(x: contentView.bounds.midX, y: CGFloat(100 + i * 50))
-            button.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]
             button.setTitle(buttonTitles[i], for: .normal)
             button.setTitleColor(.white, for: .normal)
+            button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
+            button.titleLabel?.adjustsFontForContentSizeCategory = true
+            button.titleLabel?.numberOfLines = 0
+            button.titleLabel?.textAlignment = .center
+            button.contentEdgeInsets = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
+            button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
             button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)
             button.tag = i + 1
-            contentView.addSubview(button)
+            buttonStack.addArrangedSubview(button)
             
             
         }
+
+        let safeArea = contentView.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            buttonStack.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor),
+            buttonStack.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor),
+            buttonStack.leadingAnchor.constraint(greaterThanOrEqualTo: safeArea.leadingAnchor, constant: 20),
+            buttonStack.trailingAnchor.constraint(lessThanOrEqualTo: safeArea.trailingAnchor, constant: -20),
+            buttonStack.topAnchor.constraint(greaterThanOrEqualTo: safeArea.topAnchor, constant: 20),
+            buttonStack.bottomAnchor.constraint(lessThanOrEqualTo: safeArea.bottomAnchor, constant: -20)
+        ])
         
     }
     

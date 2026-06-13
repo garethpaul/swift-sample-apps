@@ -39,6 +39,8 @@ Helpful reports include:
   performs no remote image loading or device-specific frame assumptions.
 - Background selection avoids delayed animation completion writes, keeping
   rapid local UI actions deterministic without introducing external state.
+- Background controls use safe-area constraints and minimum touch targets
+  instead of hard-coded positions that can become unreachable or undersized.
 
 ## Mobile Privacy Notes
 
