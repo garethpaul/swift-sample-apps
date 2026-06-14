@@ -144,6 +144,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   responsive canary layout contract.
 - See `docs/plans/2026-06-13-background-selection-semantics.md` for exclusive
   selected-state accessibility coverage.
+- See `docs/plans/2026-06-14-make-root-override-protection.md` for authoritative
+  repository-root selection across all Make aliases.
 
 ## Contributing
 
