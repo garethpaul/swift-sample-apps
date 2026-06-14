@@ -18,6 +18,7 @@ RESPONSIVE_CANARY_PLAN = DOCS_PLANS / "2026-06-10-responsive-background-switcher
 BACKGROUND_SELECTION_PLAN = DOCS_PLANS / "2026-06-12-latest-background-selection.md"
 ACCESSIBLE_BACKGROUND_CONTROLS_PLAN = DOCS_PLANS / "2026-06-13-accessible-background-controls.md"
 BACKGROUND_SELECTION_SEMANTICS_PLAN = DOCS_PLANS / "2026-06-13-background-selection-semantics.md"
+ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -136,6 +137,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-13-accessible-background-controls.md is missing")
     if not BACKGROUND_SELECTION_SEMANTICS_PLAN.exists():
         errors.append("docs/plans/2026-06-13-background-selection-semantics.md is missing")
+    if not ROOT_OVERRIDE_PLAN.exists():
+        errors.append("docs/plans/2026-06-14-make-root-override-protection.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -157,8 +160,21 @@ def hygiene_checks():
         errors.append("GitHub Actions workflow must match the reviewed portable verification contract")
 
     makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    root_declaration = "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))"
+    if makefile.count(root_declaration) != 1:
+        errors.append("Makefile must contain exactly one protected repository-root declaration")
+    tool_and_root_block = "\n".join((
+        "PYTHON ?= python3",
+        "XCODEBUILD ?= xcodebuild",
+        root_declaration,
+    ))
+    if makefile.count(tool_and_root_block) != 1:
+        errors.append("Makefile must keep tool overrides before the protected repository root")
     for contract in (
-        "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
+        ".PHONY: build check lint test verify",
+        "build: lint",
+        "verify: lint test build",
+        "check: verify",
         '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
         '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
         "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
@@ -168,6 +184,8 @@ def hygiene_checks():
     ):
         if contract not in makefile:
             errors.append(f"Makefile must keep background switcher build contract: {contract}")
+    if "docs/plans/2026-06-14-make-root-override-protection.md" not in (ROOT / "README.md").read_text(encoding="utf-8"):
+        errors.append("README must index Make root override protection evidence")
     if "for project in */*.xcodeproj" in makefile:
         errors.append("Makefile must not build samples that require absent legacy SDK frameworks")
 
