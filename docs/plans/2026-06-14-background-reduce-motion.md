@@ -1,6 +1,6 @@
 # Background Reduce Motion
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -26,12 +26,18 @@ semantics.
 
 ## Verification
 
-- focused sample contract and full `make check`
-- repository and external-directory Make invocation
-- hostile preference, immediate-assignment, branch-ordering, transition,
-  documentation, suite-contract, and plan-status mutations
-- hosted macOS 15 background-switcher compilation on the exact pushed head
-- generated-artifact, credential-pattern, protected-path, and exact-diff audits
+- The focused sample contract passed with the preference branch, direct
+  assignment, successful-selection ordering, and unchanged transition intact.
+- The repository and external-directory `make check` passed in an isolated
+  Git-backed copy; Linux reported the documented static-only boundary because
+  `xcodebuild` is unavailable.
+- Seven hostile Reduce Motion mutations were rejected: preference guard,
+  immediate assignment, branch ordering, transition fallback, documentation,
+  README evidence index, and plan-status regressions.
+- Hosted macOS 15 background-switcher compilation remains the native build
+  authority for the exact pushed head.
+- Generated-artifact, credential-pattern, protected-path, and exact-diff audits
+  passed before commit.
 
 ## Scope Boundary
 

@@ -37,6 +37,8 @@ Priority:
 - Keep background controls safe-area-aware, touch-accessible, and compatible
   with preferred text sizes
 - Preserve background selection semantics for assistive technology
+- Preserve Reduce Motion background changes without weakening rapid selection
+  behavior
 - Treat remaining Swift and SDK versions as legacy until documented per sample
 
 Next priorities:

@@ -43,6 +43,8 @@ Helpful reports include:
   instead of hard-coded positions that can become unreachable or undersized.
 - Background selection semantics expose only the successfully applied local
   color choice and do not widen the sample's data or permission surface.
+- Reduce Motion background changes replace animation with an immediate local
+  color assignment and do not introduce external state or permissions.
 
 ## Mobile Privacy Notes
 

@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-14
+
+- Added Reduce Motion background changes that apply successful color choices
+  immediately while preserving the existing transition for other users.
+
 ## 2026-06-13
 
 - Added exclusive background selection semantics and the selected accessibility

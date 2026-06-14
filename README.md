@@ -82,6 +82,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   the latest selected color instead of allowing stale completion writes.
 - Background selection semantics keep one button selected and expose the same
   state through the selected accessibility trait.
+- Reduce Motion background changes apply the selected color immediately while
+  retaining the interruptible cross-dissolve for other users.
 - Facebook user profile payloads are optional-cast before UI updates, malformed
   profiles clear stale values, and user-cancelled login does not show an empty
   alert.
@@ -146,6 +148,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   selected-state accessibility coverage.
 - See `docs/plans/2026-06-14-make-root-override-protection.md` for authoritative
   repository-root selection across all Make aliases.
+- See `docs/plans/2026-06-14-background-reduce-motion.md` for the system motion
+  preference behavior of successful background selections.
 
 ## Contributing
 

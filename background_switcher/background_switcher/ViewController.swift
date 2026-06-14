@@ -75,15 +75,19 @@ class ViewController: UIViewController {
         let imageSelector = "Background\(sender.tag)"
         if let backgroundColor = self.backgroundDict[imageSelector] {
             updateSelectedButton(sender)
-            UIView.transition(
-                with: imageView,
-                duration: 0.4,
-                options: [.transitionCrossDissolve, .beginFromCurrentState, .allowUserInteraction],
-                animations: {
-                    self.imageView.backgroundColor = backgroundColor
-                },
-                completion: nil
-            )
+            if UIAccessibility.isReduceMotionEnabled {
+                imageView.backgroundColor = backgroundColor
+            } else {
+                UIView.transition(
+                    with: imageView,
+                    duration: 0.4,
+                    options: [.transitionCrossDissolve, .beginFromCurrentState, .allowUserInteraction],
+                    animations: {
+                        self.imageView.backgroundColor = backgroundColor
+                    },
+                    completion: nil
+                )
+            }
         }
     }
 
