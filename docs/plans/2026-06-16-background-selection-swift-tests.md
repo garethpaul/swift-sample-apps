@@ -42,3 +42,8 @@ contracts.
 - Local `swiftc is unavailable` and `xcodebuild` is unavailable, so executable
   Swift and simulator-build proof remains required from exact-head hosted macOS
   checks before merge.
+- Exact implementation head `dcbc942a7863e8b2b1703f8adc6dab1d3a80dfe6`
+  passed pull-request run `27642636776`: Ubuntu contract job `81746388949`
+  and hosted macOS build job `81746389094`. Both jobs record
+  `Background selection Swift tests passed.`, and the macOS job records
+  `BUILD SUCCEEDED` for the simulator canary.
