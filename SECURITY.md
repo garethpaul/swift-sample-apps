@@ -1,5 +1,8 @@
 # Security Policy
 
+Background selection behavior is tested without UIKit to ensure invalid button
+tags fail closed before any color or accessibility state changes.
+
 ## Supported Versions
 
 The supported security scope for `swift-sample-apps` is the current default branch, `master`. Older commits, tags, branches, forks, demos, and generated artifacts are not actively supported unless the repository explicitly marks them as maintained.

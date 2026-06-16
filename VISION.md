@@ -1,5 +1,8 @@
 ## Swift Sample Apps Vision
 
+Background selection behavior should remain executable independently of UIKit
+while the sample preserves its visual transition and accessibility semantics.
+
 Swift Sample Apps is an archive of small iOS examples, including background
 switching, basic notes, Facebook login, Parse setup, Swift object examples, and
 a todo list.

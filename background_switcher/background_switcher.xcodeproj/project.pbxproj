@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		FD4BC159193F84C100102D5D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4BC158193F84C100102D5D /* AppDelegate.swift */; };
 		FD4BC15B193F84C100102D5D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4BC15A193F84C100102D5D /* ViewController.swift */; };
+		FD4BC180193F84C100102D5D /* BackgroundSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4BC181193F84C100102D5D /* BackgroundSelection.swift */; };
 		FD4BC15E193F84C100102D5D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD4BC15C193F84C100102D5D /* Main.storyboard */; };
 		FD4BC160193F84C100102D5D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD4BC15F193F84C100102D5D /* Images.xcassets */; };
 		FD4BC16C193F84C100102D5D /* background_switcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4BC16B193F84C100102D5D /* background_switcherTests.swift */; };
@@ -29,6 +30,7 @@
 		FD4BC157193F84C100102D5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD4BC158193F84C100102D5D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FD4BC15A193F84C100102D5D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		FD4BC181193F84C100102D5D /* BackgroundSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSelection.swift; sourceTree = "<group>"; };
 		FD4BC15D193F84C100102D5D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FD4BC15F193F84C100102D5D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		FD4BC165193F84C100102D5D /* background_switcherTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = background_switcherTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -77,6 +79,7 @@
 			children = (
 				FD4BC158193F84C100102D5D /* AppDelegate.swift */,
 				FD4BC15A193F84C100102D5D /* ViewController.swift */,
+				FD4BC181193F84C100102D5D /* BackgroundSelection.swift */,
 				FD4BC15C193F84C100102D5D /* Main.storyboard */,
 				FD4BC15F193F84C100102D5D /* Images.xcassets */,
 				FD4BC156193F84C100102D5D /* Supporting Files */,
@@ -208,6 +211,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD4BC180193F84C100102D5D /* BackgroundSelection.swift in Sources */,
 				FD4BC15B193F84C100102D5D /* ViewController.swift in Sources */,
 				FD4BC159193F84C100102D5D /* AppDelegate.swift in Sources */,
 			);

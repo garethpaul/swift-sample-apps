@@ -72,7 +72,9 @@ class ViewController: UIViewController {
     }
     
     @objc private func buttonClicked(_ sender: UIButton) {
-        let imageSelector = "Background\(sender.tag)"
+        guard let imageSelector = BackgroundSelection.key(forButtonTag: sender.tag) else {
+            return
+        }
         if let backgroundColor = self.backgroundDict[imageSelector] {
             updateSelectedButton(sender)
             if UIAccessibility.isReduceMotionEnabled {
