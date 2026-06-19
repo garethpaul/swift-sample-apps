@@ -19,6 +19,7 @@ BACKGROUND_SELECTION_PLAN = DOCS_PLANS / "2026-06-12-latest-background-selection
 ACCESSIBLE_BACKGROUND_CONTROLS_PLAN = DOCS_PLANS / "2026-06-13-accessible-background-controls.md"
 BACKGROUND_SELECTION_SEMANTICS_PLAN = DOCS_PLANS / "2026-06-13-background-selection-semantics.md"
 ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
+BACKGROUND_REDUCE_MOTION_PLAN = DOCS_PLANS / "2026-06-14-background-reduce-motion.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -139,6 +140,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-13-background-selection-semantics.md is missing")
     if not ROOT_OVERRIDE_PLAN.exists():
         errors.append("docs/plans/2026-06-14-make-root-override-protection.md is missing")
+    if not BACKGROUND_REDUCE_MOTION_PLAN.exists():
+        errors.append("docs/plans/2026-06-14-background-reduce-motion.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -147,6 +150,14 @@ def hygiene_checks():
         plan = plan_path.read_text(encoding="utf-8")
         if "Status: Completed" not in plan or "make check" not in plan:
             errors.append(f"{plan_path.relative_to(ROOT)} must record completed status and make check verification")
+    if BACKGROUND_REDUCE_MOTION_PLAN.exists():
+        reduce_motion_plan = BACKGROUND_REDUCE_MOTION_PLAN.read_text(encoding="utf-8")
+        for evidence in (
+            "repository and external-directory `make check` passed",
+            "hostile Reduce Motion mutations were rejected",
+        ):
+            if evidence not in reduce_motion_plan:
+                errors.append(f"{BACKGROUND_REDUCE_MOTION_PLAN.relative_to(ROOT)} must record verification evidence: {evidence}")
 
     for path in tracked_files():
         if "/xcuserdata/" in path or path.endswith(".xcuserstate"):
@@ -186,6 +197,8 @@ def hygiene_checks():
             errors.append(f"Makefile must keep background switcher build contract: {contract}")
     if "docs/plans/2026-06-14-make-root-override-protection.md" not in (ROOT / "README.md").read_text(encoding="utf-8"):
         errors.append("README must index Make root override protection evidence")
+    if "docs/plans/2026-06-14-background-reduce-motion.md" not in (ROOT / "README.md").read_text(encoding="utf-8"):
+        errors.append("README must index background Reduce Motion evidence")
     if "for project in */*.xcodeproj" in makefile:
         errors.append("Makefile must not build samples that require absent legacy SDK frameworks")
 
@@ -249,6 +262,8 @@ def samples_checks():
     for doc_path in ("README.md", "SECURITY.md", "VISION.md", "CHANGES.md"):
         if "background selection semantics" not in (ROOT / doc_path).read_text(encoding="utf-8").lower():
             errors.append(f"{doc_path} must document background selection semantics")
+        if "reduce motion background changes" not in (ROOT / doc_path).read_text(encoding="utf-8").lower():
+            errors.append(f"{doc_path} must document Reduce Motion background changes")
 
     for path, text in tracked_text_files():
         for marker in KNOWN_CREDENTIAL_MARKERS:
@@ -336,7 +351,13 @@ def samples_checks():
                 errors.append(f"background transition must remain interruptible and interactive in {path}")
             if "duration: 0.4" not in text:
                 errors.append(f"background transition must preserve the sample duration in {path}")
-            if "animations: {\n                    self.imageView.backgroundColor = backgroundColor\n                },\n                completion: nil" not in text:
+            transition_assignment = (
+                "animations: {\n"
+                "                        self.imageView.backgroundColor = backgroundColor\n"
+                "                    },\n"
+                "                    completion: nil"
+            )
+            if transition_assignment not in text:
                 errors.append(f"background transition must assign color without a delayed completion write in {path}")
             if 'if let backgroundColor = self.backgroundDict[imageSelector]' not in text:
                 errors.append(f"background selection must preserve guarded color lookup in {path}")
@@ -346,8 +367,21 @@ def samples_checks():
                 errors.append(f"background controls must retain each configured button in {path}")
             if "if let initialButton = backgroundButtons.first {\n            updateSelectedButton(initialButton)\n        }" not in text:
                 errors.append(f"background controls must initialize the first selected state safely in {path}")
-            if "if let backgroundColor = self.backgroundDict[imageSelector] {\n            updateSelectedButton(sender)\n            UIView.transition(" not in text:
+            reduce_motion_order = (
+                "if let backgroundColor = self.backgroundDict[imageSelector] {\n"
+                "            updateSelectedButton(sender)\n"
+                "            if UIAccessibility.isReduceMotionEnabled {"
+            )
+            if reduce_motion_order not in text:
                 errors.append(f"background selection semantics must update only after valid color lookup in {path}")
+            reduce_motion_contract = (
+                "if UIAccessibility.isReduceMotionEnabled {\n"
+                "                imageView.backgroundColor = backgroundColor\n"
+                "            } else {\n"
+                "                UIView.transition("
+            )
+            if reduce_motion_contract not in text:
+                errors.append(f"background changes must bypass animation when Reduce Motion is enabled in {path}")
             if "button.isSelected = button === selectedButton" not in text:
                 errors.append(f"background selection must remain exclusive in {path}")
             if "button.accessibilityTraits.insert(.selected)" not in text or "button.accessibilityTraits.remove(.selected)" not in text:
