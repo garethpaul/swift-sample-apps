@@ -154,6 +154,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   preference behavior of successful background selections.
 - See `docs/plans/2026-06-16-background-selection-swift-tests.md` for the
   executable button-tag mapping boundary.
+- See `docs/plans/2026-06-19-background-test-execution-contract.md` for the
+  static guarantee that the compiled selection test binary is executed.
 
 ## Contributing
 

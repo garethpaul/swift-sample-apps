@@ -21,6 +21,7 @@ BACKGROUND_SELECTION_SEMANTICS_PLAN = DOCS_PLANS / "2026-06-13-background-select
 ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 BACKGROUND_REDUCE_MOTION_PLAN = DOCS_PLANS / "2026-06-14-background-reduce-motion.md"
 BACKGROUND_SELECTION_TEST_PLAN = DOCS_PLANS / "2026-06-16-background-selection-swift-tests.md"
+BACKGROUND_TEST_EXECUTION_PLAN = DOCS_PLANS / "2026-06-19-background-test-execution-contract.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -150,6 +151,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-14-background-reduce-motion.md is missing")
     if not BACKGROUND_SELECTION_TEST_PLAN.exists():
         errors.append("docs/plans/2026-06-16-background-selection-swift-tests.md is missing")
+    if not BACKGROUND_TEST_EXECUTION_PLAN.exists():
+        errors.append("docs/plans/2026-06-19-background-test-execution-contract.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -296,8 +299,16 @@ def hygiene_checks():
         ):
             if contract not in runner:
                 errors.append(f"background selection runner contract is missing: {contract}")
+        executable = '"$BUILD_DIR/background-selection-tests"'
+        if f'-o {executable}' not in runner:
+            errors.append("background selection runner must compile the expected test binary")
+        if [line.strip() for line in runner.splitlines()].count(executable) != 1:
+            errors.append("background selection runner must execute the compiled test binary exactly once")
         if not (BACKGROUND_SELECTION_RUNNER.stat().st_mode & 0o111):
             errors.append("background selection test runner must be executable")
+
+    if str(BACKGROUND_TEST_EXECUTION_PLAN.relative_to(ROOT)) not in (ROOT / "README.md").read_text(encoding="utf-8"):
+        errors.append("README must index background test execution contract evidence")
 
     for document in ("README.md", "SECURITY.md", "VISION.md", "CHANGES.md"):
         if "Background selection behavior" not in (ROOT / document).read_text(encoding="utf-8"):

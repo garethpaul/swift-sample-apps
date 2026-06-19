@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-19
+
+- Portable verification now rejects background-selection test runners that
+  compile the behavioral harness without executing the resulting binary.
+
 ## 2026-06-16
 
 - Background selection behavior now executes production button-tag mapping for
