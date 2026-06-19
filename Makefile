@@ -2,7 +2,7 @@
 
 PYTHON ?= python3
 XCODEBUILD ?= xcodebuild
-ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj
 
 lint:
