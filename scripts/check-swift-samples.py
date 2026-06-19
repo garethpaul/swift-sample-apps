@@ -21,6 +21,7 @@ BACKGROUND_SELECTION_SEMANTICS_PLAN = DOCS_PLANS / "2026-06-13-background-select
 ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 BACKGROUND_REDUCE_MOTION_PLAN = DOCS_PLANS / "2026-06-14-background-reduce-motion.md"
 BACKGROUND_SELECTION_TEST_PLAN = DOCS_PLANS / "2026-06-16-background-selection-swift-tests.md"
+BACKGROUND_TEST_EXECUTION_PLAN = DOCS_PLANS / "2026-06-19-background-test-execution-contract.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -66,6 +67,8 @@ jobs:
         run: xcodebuild -version
       - name: Run background selection behavior tests
         run: make test
+      - name: Run native background switcher tests
+        run: make native-test
       - name: Build background switcher canary
         run: make build
 """
@@ -150,6 +153,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-14-background-reduce-motion.md is missing")
     if not BACKGROUND_SELECTION_TEST_PLAN.exists():
         errors.append("docs/plans/2026-06-16-background-selection-swift-tests.md is missing")
+    if not BACKGROUND_TEST_EXECUTION_PLAN.exists():
+        errors.append("docs/plans/2026-06-19-background-test-execution-contract.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -202,15 +207,20 @@ def hygiene_checks():
     if makefile.count(tool_and_root_block) != 1:
         errors.append("Makefile must keep tool overrides before the protected repository root")
     for contract in (
-        ".PHONY: build check lint test verify",
+        ".PHONY: build check lint native-test test verify",
         "build: lint",
-        "verify: lint test build",
+        "verify: lint test native-test build",
         "check: verify",
         '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
         '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
         '"$(ROOT)/scripts/test-background-selection.sh"',
         'swiftc unavailable; skipping background selection Swift tests',
         "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
+        "native-test:",
+        "-scheme background_switcher",
+        "platform=iOS Simulator,name=iPhone 16 Pro,OS=latest",
+        "test;",
+        "xcodebuild unavailable; skipping native background switcher tests",
         "-target background_switcher",
         "generic/platform=iOS Simulator",
         "CODE_SIGNING_ALLOWED=NO",
@@ -238,12 +248,12 @@ def hygiene_checks():
         errors.append("background switcher project must keep one BackgroundSelection.swift file reference")
 
     canary_source = (ROOT / "background_switcher/background_switcher/ViewController.swift").read_text(encoding="utf-8")
-    for contract in ("for i in buttonTitles.indices", "#selector(buttonClicked(_:))", "UIView.transition("):
+    for contract in ("for selection in BackgroundSelection.allCases", "#selector(buttonClicked(_:))", "UIView.transition("):
         if contract not in canary_source:
             errors.append(f"background switcher must keep Swift 5 source contract: {contract}")
     if "width: CGFloat = 320" in canary_source or "height: CGFloat = 568" in canary_source:
         errors.append("background switcher must not use a fixed legacy device canvas")
-    if "guard let imageSelector = BackgroundSelection.key(forButtonTag: sender.tag) else {" not in canary_source:
+    if "guard let selection = BackgroundSelection.selection(forButtonTag: sender.tag) else {" not in canary_source:
         errors.append("background switcher controller must delegate tag mapping to BackgroundSelection")
     if 'let imageSelector = "Background\\(sender.tag)"' in canary_source:
         errors.append("background switcher controller must not interpolate unchecked button tags")
@@ -253,11 +263,13 @@ def hygiene_checks():
     else:
         selection_source = BACKGROUND_SELECTION_SOURCE.read_text(encoding="utf-8")
         for contract in (
-            'private static let keys = ["Background1", "Background2"]',
-            "guard tag > 0 else {",
-            "let index = tag - 1",
-            "guard keys.indices.contains(index) else {",
-            "return keys[index]",
+            "enum BackgroundSelection: Int, CaseIterable",
+            "case first = 1",
+            "case second = 2",
+            'return "Background\\(rawValue)"',
+            'return "Background \\(rawValue)"',
+            "return BackgroundSelection(rawValue: tag)",
+            "return selection(forButtonTag: tag)?.key",
         ):
             if contract not in selection_source:
                 errors.append(f"background selection production contract is missing: {contract}")
@@ -296,8 +308,16 @@ def hygiene_checks():
         ):
             if contract not in runner:
                 errors.append(f"background selection runner contract is missing: {contract}")
+        executable = '"$BUILD_DIR/background-selection-tests"'
+        if f'-o {executable}' not in runner:
+            errors.append("background selection runner must compile the expected test binary")
+        if [line.strip() for line in runner.splitlines()].count(executable) != 1:
+            errors.append("background selection runner must execute the compiled test binary exactly once")
         if not (BACKGROUND_SELECTION_RUNNER.stat().st_mode & 0o111):
             errors.append("background selection test runner must be executable")
+
+    if str(BACKGROUND_TEST_EXECUTION_PLAN.relative_to(ROOT)) not in (ROOT / "README.md").read_text(encoding="utf-8"):
+        errors.append("README must index background test execution contract evidence")
 
     for document in ("README.md", "SECURITY.md", "VISION.md", "CHANGES.md"):
         if "Background selection behavior" not in (ROOT / document).read_text(encoding="utf-8"):
@@ -444,7 +464,7 @@ def samples_checks():
             )
             if transition_assignment not in text:
                 errors.append(f"background transition must assign color without a delayed completion write in {path}")
-            if 'if let backgroundColor = self.backgroundDict[imageSelector]' not in text:
+            if 'if let backgroundColor = self.backgroundDict[selection.key]' not in text:
                 errors.append(f"background selection must preserve guarded color lookup in {path}")
             if "private var backgroundButtons: [UIButton] = []" not in text:
                 errors.append(f"background controls must retain buttons for selection updates in {path}")
@@ -453,14 +473,16 @@ def samples_checks():
             if "if let initialButton = backgroundButtons.first {\n            updateSelectedButton(initialButton)\n        }" not in text:
                 errors.append(f"background controls must initialize the first selected state safely in {path}")
             reduce_motion_order = (
-                "if let backgroundColor = self.backgroundDict[imageSelector] {\n"
+                "if let backgroundColor = self.backgroundDict[selection.key] {\n"
+                "            selectedBackground = selection\n"
                 "            updateSelectedButton(sender)\n"
-                "            if UIAccessibility.isReduceMotionEnabled {"
+                "            if reduceMotionEnabledProvider() {"
             )
             if reduce_motion_order not in text:
                 errors.append(f"background selection semantics must update only after valid color lookup in {path}")
             reduce_motion_contract = (
-                "if UIAccessibility.isReduceMotionEnabled {\n"
+                "if reduceMotionEnabledProvider() {\n"
+                "                imageView.layer.removeAllAnimations()\n"
                 "                imageView.backgroundColor = backgroundColor\n"
                 "            } else {\n"
                 "                UIView.transition("
@@ -473,6 +495,16 @@ def samples_checks():
                 errors.append(f"background selection must synchronize the selected accessibility trait in {path}")
             if "button.contentEdgeInsets = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)" not in text:
                 errors.append(f"background controls must preserve padded Dynamic Type targets in {path}")
+            for contract in (
+                "button.accessibilityLabel = selection.title",
+                "button.accessibilityTraits.insert(.button)",
+                "buttonStack.accessibilityElements = backgroundButtons",
+                "UIAccessibility.reduceMotionStatusDidChangeNotification",
+                "imageView.layer.removeAllAnimations()",
+                "imageView.backgroundColor = backgroundColor(for: selectedBackground)",
+            ):
+                if contract not in text:
+                    errors.append(f"background accessibility and motion contract is missing in {path}: {contract}")
 
     return errors
 

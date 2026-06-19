@@ -42,6 +42,7 @@ Priority:
 - Preserve background selection semantics for assistive technology
 - Preserve Reduce Motion background changes without weakening rapid selection
   behavior
+- Execute the native background-switcher XCTest target in current macOS CI
 - Treat remaining Swift and SDK versions as legacy until documented per sample
 
 Next priorities:

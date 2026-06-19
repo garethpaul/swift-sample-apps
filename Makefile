@@ -1,4 +1,4 @@
-.PHONY: build check lint test verify
+.PHONY: build check lint native-test test verify
 
 PYTHON ?= python3
 XCODEBUILD ?= xcodebuild
@@ -17,6 +17,13 @@ test:
 		echo "swiftc unavailable; skipping background selection Swift tests"; \
 	fi
 
+native-test:
+	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \
+		"$(XCODEBUILD)" -project "$(CANARY_PROJECT)" -scheme background_switcher -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' CODE_SIGNING_ALLOWED=NO test; \
+	else \
+		echo "xcodebuild unavailable; skipping native background switcher tests"; \
+	fi
+
 build: lint
 	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \
 		"$(XCODEBUILD)" -project "$(CANARY_PROJECT)" -target background_switcher -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build; \
@@ -24,6 +31,6 @@ build: lint
 		echo "xcodebuild not found; static sample checks completed"; \
 	fi
 
-verify: lint test build
+verify: lint test native-test build
 
 check: verify

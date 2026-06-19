@@ -48,6 +48,8 @@ Helpful reports include:
   color choice and do not widen the sample's data or permission surface.
 - Reduce Motion background changes replace animation with an immediate local
   color assignment and do not introduce external state or permissions.
+- Runtime Reduce Motion changes cancel local layer animations and restore the
+  latest selected local color; native XCTest verifies the cancellation path.
 
 ## Mobile Privacy Notes
 
