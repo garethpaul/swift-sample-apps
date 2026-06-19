@@ -11,6 +11,7 @@ class ViewController: UIViewController {
     
     var imageView:UIImageView = UIImageView()
     var backgroundDict:Dictionary<String,UIColor> = Dictionary()
+    private var backgroundButtons: [UIButton] = []
     
     
     override func viewDidLoad() {
@@ -49,6 +50,7 @@ class ViewController: UIViewController {
             button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
             button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)
             button.tag = i + 1
+            backgroundButtons.append(button)
             buttonStack.addArrangedSubview(button)
             
             
@@ -63,12 +65,16 @@ class ViewController: UIViewController {
             buttonStack.topAnchor.constraint(greaterThanOrEqualTo: safeArea.topAnchor, constant: 20),
             buttonStack.bottomAnchor.constraint(lessThanOrEqualTo: safeArea.bottomAnchor, constant: -20)
         ])
+        if let initialButton = backgroundButtons.first {
+            updateSelectedButton(initialButton)
+        }
         
     }
     
     @objc private func buttonClicked(_ sender: UIButton) {
         let imageSelector = "Background\(sender.tag)"
         if let backgroundColor = self.backgroundDict[imageSelector] {
+            updateSelectedButton(sender)
             UIView.transition(
                 with: imageView,
                 duration: 0.4,
@@ -78,6 +84,17 @@ class ViewController: UIViewController {
                 },
                 completion: nil
             )
+        }
+    }
+
+    private func updateSelectedButton(_ selectedButton: UIButton) {
+        for button in backgroundButtons {
+            button.isSelected = button === selectedButton
+            if button.isSelected {
+                button.accessibilityTraits.insert(.selected)
+            } else {
+                button.accessibilityTraits.remove(.selected)
+            }
         }
     }
     

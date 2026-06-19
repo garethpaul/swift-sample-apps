@@ -80,6 +80,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   constraints, 44-point minimum targets, padding, and Dynamic Type text.
 - Background changes use one interruptible cross-dissolve, so rapid taps keep
   the latest selected color instead of allowing stale completion writes.
+- Background selection semantics keep one button selected and expose the same
+  state through the selected accessibility trait.
 - Facebook user profile payloads are optional-cast before UI updates, malformed
   profiles clear stale values, and user-cancelled login does not show an empty
   alert.
@@ -140,6 +142,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   validation, cancellation behavior, and the CI gate.
 - See `docs/plans/2026-06-10-responsive-background-switcher.md` for the
   responsive canary layout contract.
+- See `docs/plans/2026-06-13-background-selection-semantics.md` for exclusive
+  selected-state accessibility coverage.
 
 ## Contributing
 

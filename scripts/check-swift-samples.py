@@ -17,6 +17,7 @@ BUILD_CANARY_PLAN = DOCS_PLANS / "2026-06-10-background-switcher-build.md"
 RESPONSIVE_CANARY_PLAN = DOCS_PLANS / "2026-06-10-responsive-background-switcher.md"
 BACKGROUND_SELECTION_PLAN = DOCS_PLANS / "2026-06-12-latest-background-selection.md"
 ACCESSIBLE_BACKGROUND_CONTROLS_PLAN = DOCS_PLANS / "2026-06-13-accessible-background-controls.md"
+BACKGROUND_SELECTION_SEMANTICS_PLAN = DOCS_PLANS / "2026-06-13-background-selection-semantics.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -133,6 +134,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-12-latest-background-selection.md is missing")
     if not ACCESSIBLE_BACKGROUND_CONTROLS_PLAN.exists():
         errors.append("docs/plans/2026-06-13-accessible-background-controls.md is missing")
+    if not BACKGROUND_SELECTION_SEMANTICS_PLAN.exists():
+        errors.append("docs/plans/2026-06-13-background-selection-semantics.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -225,6 +228,9 @@ def samples_checks():
     for required in ("README.md", "SECURITY.md", "VISION.md", "LICENSE"):
         if not (ROOT / required).exists():
             errors.append(f"missing repository document: {required}")
+    for doc_path in ("README.md", "SECURITY.md", "VISION.md", "CHANGES.md"):
+        if "background selection semantics" not in (ROOT / doc_path).read_text(encoding="utf-8").lower():
+            errors.append(f"{doc_path} must document background selection semantics")
 
     for path, text in tracked_text_files():
         for marker in KNOWN_CREDENTIAL_MARKERS:
@@ -316,6 +322,18 @@ def samples_checks():
                 errors.append(f"background transition must assign color without a delayed completion write in {path}")
             if 'if let backgroundColor = self.backgroundDict[imageSelector]' not in text:
                 errors.append(f"background selection must preserve guarded color lookup in {path}")
+            if "private var backgroundButtons: [UIButton] = []" not in text:
+                errors.append(f"background controls must retain buttons for selection updates in {path}")
+            if "backgroundButtons.append(button)" not in text:
+                errors.append(f"background controls must retain each configured button in {path}")
+            if "if let initialButton = backgroundButtons.first {\n            updateSelectedButton(initialButton)\n        }" not in text:
+                errors.append(f"background controls must initialize the first selected state safely in {path}")
+            if "if let backgroundColor = self.backgroundDict[imageSelector] {\n            updateSelectedButton(sender)\n            UIView.transition(" not in text:
+                errors.append(f"background selection semantics must update only after valid color lookup in {path}")
+            if "button.isSelected = button === selectedButton" not in text:
+                errors.append(f"background selection must remain exclusive in {path}")
+            if "button.accessibilityTraits.insert(.selected)" not in text or "button.accessibilityTraits.remove(.selected)" not in text:
+                errors.append(f"background selection must synchronize the selected accessibility trait in {path}")
             if "button.contentEdgeInsets = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)" not in text:
                 errors.append(f"background controls must preserve padded Dynamic Type targets in {path}")
 
