@@ -2,6 +2,15 @@
 
 ## 2026-06-19
 
+- Replaced the legacy placeholder XCTest target with native tests for stable
+  selection mapping, rapid taps, selected accessibility state, control labels
+  and traits, and runtime Reduce Motion changes.
+- Added `make native-test` to local and hosted macOS verification. The native
+  target now builds with testability enabled on current Xcode.
+- Runtime Reduce Motion changes now cancel an active transition and settle the
+  image on the latest selected background instead of leaving motion in flight.
+- Background keys, titles, tags, and colors now derive from one deterministic
+  selection model rather than parallel index-based collections.
 - Portable verification now rejects background-selection test runners that
   compile the behavioral harness without executing the resulting binary.
 

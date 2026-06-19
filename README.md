@@ -72,6 +72,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   `xcodebuild` is installed, the `build` target compiles the self-contained
   `background_switcher` canary for a generic iOS Simulator. Parse and Facebook
   samples remain static-only because their legacy SDK frameworks are absent.
+- `make native-test` executes the checked-in `background_switcherTests` XCTest
+  target on the latest installed iPhone 16 Pro simulator. `make check` includes
+  this gate when Xcode is available and reports an explicit skip otherwise.
 - GitHub Actions runs portable checks on Ubuntu 24.04 and the Swift 5/iOS 12
   background-switcher build canary on macOS 15; both jobs use credential-free
   checkout.
@@ -85,7 +88,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - Background selection behavior executes the production button-tag mapping for
   both valid choices and fail-closed invalid tags on a standard Swift compiler.
 - Reduce Motion background changes apply the selected color immediately while
-  retaining the interruptible cross-dissolve for other users.
+  retaining the interruptible cross-dissolve for other users. Runtime preference
+  changes cancel an active transition and settle on the latest selected color.
 - Facebook user profile payloads are optional-cast before UI updates, malformed
   profiles clear stale values, and user-cancelled login does not show an empty
   alert.
@@ -156,6 +160,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   executable button-tag mapping boundary.
 - See `docs/plans/2026-06-19-background-test-execution-contract.md` for the
   static guarantee that the compiled selection test binary is executed.
+- See `docs/plans/2026-06-19-background-native-deep-review.md` for the native
+  XCTest, accessibility, animation ownership, and Reduce Motion review.
 
 ## Contributing
 

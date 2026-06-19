@@ -1,35 +1,87 @@
-//
-//  background_switcherTests.swift
-//  background_switcherTests
-//
-//  Created by Gareth Paul Jones on 6/4/14.
-//  Copyright (c) 2014 Gareth Paul Jones. All rights reserved.
-//
-
 import XCTest
+@testable import background_switcher
 
-class background_switcherTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+final class BackgroundSwitcherTests: XCTestCase {
+    func testSelectionMappingIsStable() {
+        XCTAssertEqual(BackgroundSelection.selection(forButtonTag: 1), .first)
+        XCTAssertEqual(BackgroundSelection.selection(forButtonTag: 2), .second)
+        XCTAssertNil(BackgroundSelection.selection(forButtonTag: 0))
+        XCTAssertNil(BackgroundSelection.selection(forButtonTag: 3))
+        XCTAssertEqual(BackgroundSelection.first.key, "Background1")
+        XCTAssertEqual(BackgroundSelection.second.key, "Background2")
+        XCTAssertEqual(BackgroundSelection.first.title, "Background 1")
+        XCTAssertEqual(BackgroundSelection.second.title, "Background 2")
     }
-    
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
+
+    func testButtonsExposeLabelsTraitsAndExclusiveSelection() {
+        let viewController = makeViewController()
+        let buttons = backgroundButtons(in: viewController.view)
+
+        XCTAssertEqual(buttons.map(\.accessibilityLabel), ["Background 1", "Background 2"])
+        XCTAssertTrue(buttons.allSatisfy { $0.accessibilityTraits.contains(.button) })
+        let buttonStack = firstStackView(in: viewController.view)
+        XCTAssertEqual(buttonStack?.accessibilityElements as? [UIButton], buttons)
+        XCTAssertTrue(buttons[0].isSelected)
+        XCTAssertTrue(buttons[0].accessibilityTraits.contains(.selected))
+        XCTAssertFalse(buttons[1].isSelected)
+        XCTAssertFalse(buttons[1].accessibilityTraits.contains(.selected))
+
+        buttons[1].sendActions(for: .touchUpInside)
+
+        XCTAssertFalse(buttons[0].isSelected)
+        XCTAssertFalse(buttons[0].accessibilityTraits.contains(.selected))
+        XCTAssertTrue(buttons[1].isSelected)
+        XCTAssertTrue(buttons[1].accessibilityTraits.contains(.selected))
     }
-    
-    func testExample() {
-        // This is an example of a functional test case.
-        XCTAssert(true, "Pass")
+
+    func testLatestSelectionWinsAcrossOverlappingAnimations() {
+        let viewController = makeViewController()
+        viewController.reduceMotionEnabledProvider = { false }
+        let buttons = backgroundButtons(in: viewController.view)
+
+        buttons[1].sendActions(for: .touchUpInside)
+        buttons[0].sendActions(for: .touchUpInside)
+
+        XCTAssertEqual(viewController.imageView.backgroundColor, viewController.backgroundColor(for: .first))
+        XCTAssertTrue(buttons[0].isSelected)
+        XCTAssertFalse(buttons[1].isSelected)
     }
-    
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measureBlock() {
-            // Put the code you want to measure the time of here.
+
+    func testReduceMotionChangeStopsActiveTransitionAtLatestSelection() {
+        var reduceMotionEnabled = false
+        let viewController = makeViewController()
+        viewController.reduceMotionEnabledProvider = { reduceMotionEnabled }
+        let buttons = backgroundButtons(in: viewController.view)
+
+        buttons[1].sendActions(for: .touchUpInside)
+        XCTAssertNotNil(viewController.imageView.layer.animationKeys())
+
+        reduceMotionEnabled = true
+        NotificationCenter.default.post(
+            name: UIAccessibility.reduceMotionStatusDidChangeNotification,
+            object: nil
+        )
+
+        XCTAssertNil(viewController.imageView.layer.animationKeys())
+        XCTAssertEqual(viewController.imageView.backgroundColor, viewController.backgroundColor(for: .second))
+        XCTAssertTrue(buttons[1].isSelected)
+    }
+
+    private func makeViewController() -> ViewController {
+        let viewController = ViewController()
+        viewController.loadViewIfNeeded()
+        return viewController
+    }
+
+    private func backgroundButtons(in view: UIView) -> [UIButton] {
+        let directButtons = view.subviews.compactMap { $0 as? UIButton }
+        return (directButtons + view.subviews.flatMap(backgroundButtons(in:))).sorted { $0.tag < $1.tag }
+    }
+
+    private func firstStackView(in view: UIView) -> UIStackView? {
+        if let stackView = view as? UIStackView {
+            return stackView
         }
+        return view.subviews.lazy.compactMap(firstStackView(in:)).first
     }
-    
 }

@@ -12,16 +12,17 @@ class ViewController: UIViewController {
     var imageView:UIImageView = UIImageView()
     var backgroundDict:Dictionary<String,UIColor> = Dictionary()
     private var backgroundButtons: [UIButton] = []
+    private var selectedBackground: BackgroundSelection = .first
+    private var reduceMotionObserver: NSObjectProtocol?
+    var reduceMotionEnabledProvider: () -> Bool = { UIAccessibility.isReduceMotionEnabled }
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        backgroundDict = [
-            "Background1": UIColor(red: 0.18, green: 0.33, blue: 0.58, alpha: 1.0),
-            "Background2": UIColor(red: 0.64, green: 0.20, blue: 0.32, alpha: 1.0)
-        ]
-        let buttonTitles = ["Background 1", "Background 2"]
+        backgroundDict = Dictionary(uniqueKeysWithValues: BackgroundSelection.allCases.map {
+            ($0.key, backgroundColor(for: $0))
+        })
         let contentView = UIView(frame: view.bounds)
         contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.view.addSubview(contentView)
@@ -37,10 +38,12 @@ class ViewController: UIViewController {
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(buttonStack)
         
-        for i in buttonTitles.indices {
+        for selection in BackgroundSelection.allCases {
             
             let button = UIButton(type: .system)
-            button.setTitle(buttonTitles[i], for: .normal)
+            button.setTitle(selection.title, for: .normal)
+            button.accessibilityLabel = selection.title
+            button.accessibilityTraits.insert(.button)
             button.setTitleColor(.white, for: .normal)
             button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
             button.titleLabel?.adjustsFontForContentSizeCategory = true
@@ -49,7 +52,7 @@ class ViewController: UIViewController {
             button.contentEdgeInsets = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
             button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
             button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)
-            button.tag = i + 1
+            button.tag = selection.rawValue
             backgroundButtons.append(button)
             buttonStack.addArrangedSubview(button)
             
@@ -68,16 +71,26 @@ class ViewController: UIViewController {
         if let initialButton = backgroundButtons.first {
             updateSelectedButton(initialButton)
         }
+        buttonStack.accessibilityElements = backgroundButtons
+        reduceMotionObserver = NotificationCenter.default.addObserver(
+            forName: UIAccessibility.reduceMotionStatusDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.reduceMotionStatusDidChange()
+        }
         
     }
     
     @objc private func buttonClicked(_ sender: UIButton) {
-        guard let imageSelector = BackgroundSelection.key(forButtonTag: sender.tag) else {
+        guard let selection = BackgroundSelection.selection(forButtonTag: sender.tag) else {
             return
         }
-        if let backgroundColor = self.backgroundDict[imageSelector] {
+        if let backgroundColor = self.backgroundDict[selection.key] {
+            selectedBackground = selection
             updateSelectedButton(sender)
-            if UIAccessibility.isReduceMotionEnabled {
+            if reduceMotionEnabledProvider() {
+                imageView.layer.removeAllAnimations()
                 imageView.backgroundColor = backgroundColor
             } else {
                 UIView.transition(
@@ -91,6 +104,23 @@ class ViewController: UIViewController {
                 )
             }
         }
+    }
+
+    func backgroundColor(for selection: BackgroundSelection) -> UIColor {
+        switch selection {
+        case .first:
+            return UIColor(red: 0.18, green: 0.33, blue: 0.58, alpha: 1.0)
+        case .second:
+            return UIColor(red: 0.64, green: 0.20, blue: 0.32, alpha: 1.0)
+        }
+    }
+
+    private func reduceMotionStatusDidChange() {
+        guard reduceMotionEnabledProvider() else {
+            return
+        }
+        imageView.layer.removeAllAnimations()
+        imageView.backgroundColor = backgroundColor(for: selectedBackground)
     }
 
     private func updateSelectedButton(_ selectedButton: UIButton) {
@@ -107,6 +137,12 @@ class ViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+
+    deinit {
+        if let reduceMotionObserver = reduceMotionObserver {
+            NotificationCenter.default.removeObserver(reduceMotionObserver)
+        }
     }
     
     

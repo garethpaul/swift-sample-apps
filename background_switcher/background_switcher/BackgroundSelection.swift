@@ -1,14 +1,20 @@
-enum BackgroundSelection {
-    private static let keys = ["Background1", "Background2"]
+enum BackgroundSelection: Int, CaseIterable {
+    case first = 1
+    case second = 2
+
+    var key: String {
+        return "Background\(rawValue)"
+    }
+
+    var title: String {
+        return "Background \(rawValue)"
+    }
+
+    static func selection(forButtonTag tag: Int) -> BackgroundSelection? {
+        return BackgroundSelection(rawValue: tag)
+    }
 
     static func key(forButtonTag tag: Int) -> String? {
-        guard tag > 0 else {
-            return nil
-        }
-        let index = tag - 1
-        guard keys.indices.contains(index) else {
-            return nil
-        }
-        return keys[index]
+        return selection(forButtonTag: tag)?.key
     }
 }
