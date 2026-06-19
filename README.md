@@ -77,6 +77,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   checkout.
 - The background-switcher canvas and image follow the view bounds on different
   simulator sizes and rotations, while its controls remain centered.
+- Background changes use one interruptible cross-dissolve, so rapid taps keep
+  the latest selected color instead of allowing stale completion writes.
 - Facebook user profile payloads are optional-cast before UI updates, malformed
   profiles clear stale values, and user-cancelled login does not show an empty
   alert.

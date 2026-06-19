@@ -50,15 +50,15 @@ class ViewController: UIViewController {
     @objc private func buttonClicked(_ sender: UIButton) {
         let imageSelector = "Background\(sender.tag)"
         if let backgroundColor = self.backgroundDict[imageSelector] {
-        
-            UIView.animate(withDuration: 0.4, animations: {
-                self.imageView.alpha = 0
-            }, completion: { _ in
-                self.imageView.backgroundColor = backgroundColor
-                UIView.animate(withDuration: 0.4) {
-                    self.imageView.alpha = 1
-                }
-            })
+            UIView.transition(
+                with: imageView,
+                duration: 0.4,
+                options: [.transitionCrossDissolve, .beginFromCurrentState, .allowUserInteraction],
+                animations: {
+                    self.imageView.backgroundColor = backgroundColor
+                },
+                completion: nil
+            )
         }
     }
     

@@ -37,6 +37,8 @@ Helpful reports include:
   runners; only the self-contained background-switcher sample is compiled.
 - The compiled canary derives its drawing canvas from local view bounds and
   performs no remote image loading or device-specific frame assumptions.
+- Background selection avoids delayed animation completion writes, keeping
+  rapid local UI actions deterministic without introducing external state.
 
 ## Mobile Privacy Notes
 
