@@ -76,7 +76,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   background-switcher build canary on macOS 15; both jobs use credential-free
   checkout.
 - The background-switcher canvas and image follow the view bounds on different
-  simulator sizes and rotations, while its controls remain centered.
+  simulator sizes and rotations. Its centered controls use safe-area
+  constraints, 44-point minimum targets, padding, and Dynamic Type text.
 - Background changes use one interruptible cross-dissolve, so rapid taps keep
   the latest selected color instead of allowing stale completion writes.
 - Facebook user profile payloads are optional-cast before UI updates, malformed

@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-13
+
+- Replaced fixed 20-point background button frames with a safe-area-aware
+  vertical stack, 44-point minimum targets, padding, and Dynamic Type labels.
+
 ## 2026-06-12
 
 - Replaced queued background fade completions with one interruptible

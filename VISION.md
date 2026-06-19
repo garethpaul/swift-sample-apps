@@ -34,6 +34,8 @@ Priority:
 - Keep the background-switcher Swift 5 build canary green on current Xcode
 - Keep the background-switcher canvas responsive across current view sizes
 - Keep rapid background selections aligned with the latest user action
+- Keep background controls safe-area-aware, touch-accessible, and compatible
+  with preferred text sizes
 - Treat remaining Swift and SDK versions as legacy until documented per sample
 
 Next priorities:
