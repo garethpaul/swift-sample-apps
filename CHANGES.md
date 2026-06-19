@@ -2,6 +2,10 @@
 
 ## 2026-06-19
 
+- Replaced finite background-selection call-count probing with an audited pure
+  switch model, exact-source structural verification, long-sequence regression
+  checks, and Make tool resolution that ignores caller `PYTHON`, `XCODEBUILD`,
+  `SWIFTC`, and `PATH` wrappers.
 - Replaced the legacy placeholder XCTest target with native tests for stable
   selection mapping, rapid taps, selected accessibility state, control labels
   and traits, and runtime Reduce Motion changes.

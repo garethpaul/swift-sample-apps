@@ -4,33 +4,47 @@ Status: Completed
 
 ## Context
 
-The background-selection runner contract required the compiled binary path to
-appear in `scripts/test-background-selection.sh`, but that path appears in both
-the compiler output argument and the standalone execution command. Replacing
-the execution command therefore passed `make check` on hosts without `swiftc`
-because the compiler output still satisfied the broad substring check.
+Finite black-box background-selection probes cannot prove that production is a
+pure mapping. A custom raw-value initializer with static call-count state can
+behave correctly for every finite verifier ceiling and fail on the next valid
+selection. Caller-controlled `PYTHON`, `XCODEBUILD`, `SWIFTC`, and `PATH`
+wrappers can also make local Make evidence non-authoritative if Make trusts
+them.
 
 ## Requirements
 
-- Preserve the production selection mapping and executable Swift cases.
-- Require the compiler output to target the expected selection test binary.
-- Require exactly one standalone command that executes the compiled binary.
-- Keep the portable contract effective when `swiftc` is unavailable.
-- Preserve temporary-directory cleanup and hosted iOS Simulator validation.
+- Preserve the production selection mapping as a small audited pure switch.
+- Reject added state, counters, custom raw-value initialization, process or
+  environment access, filesystem access, clock access, output, and test-aware
+  branches structurally rather than by increasing a finite call ceiling.
+- Keep the Swift adapter as raw observation only; expectations and verdicts
+  remain in the Python verifier.
+- Keep a known-broken production negative control and long-sequence regression
+  checks, including the 4,097-call bypass, as evidence that the oracle runs.
+- Resolve Python, Swift, and Xcode tools from trusted absolute locations so
+  Make variables, `PATH` wrappers, and symlinks cannot replace the gates.
+- Preserve hosted iOS Simulator validation.
 
 ## Work Completed
 
-- Added a distinct contract for the Swift compiler output argument.
-- Added a line-oriented contract requiring exactly one standalone execution of
-  the compiled selection test binary.
-- Indexed the maintenance evidence in README and CHANGES.
+- Replaced `RawRepresentable` production with an explicit `switch`-backed
+  `BackgroundSelection` model and a `buttonTag` property.
+- Added `scripts/verify-background-selection.py`, which exact-source validates
+  production and adapter files before compiling any black-box observer.
+- Changed the Swift adapter to emit raw observations only.
+- Added regression tests for the exact 4,097-call counter bypass, counter
+  threshold families, test-aware production, caller Make overrides, PATH
+  wrappers, and symlink probes.
+- Added trusted tool resolution for Make and direct runner execution.
+- Indexed the structural proof evidence in README, SECURITY, VISION, and
+  CHANGES.
 
 ## Verification
 
-- The missing-execution mutation passed `make check` before the contract fix.
-- Missing, duplicated, and mismatched-output mutations are rejected after the
-  fix on a host without `swiftc`.
-- Repository and external-directory `make check` passed.
-- Digest-pinned Swift executable tests passed from repository and external
-  working directories.
+- Exact 4,097-call and broader counter-threshold mutations passed before the
+  structural verifier and are rejected after it.
+- Process/test-aware production mutations are rejected structurally.
+- Caller `PYTHON`, `XCODEBUILD`, `SWIFTC`, PATH-wrapper, and symlink probes do
+  not replace trusted local gates.
+- Repository and external-directory `make check` must pass before publication.
 - Exact-head hosted `build` and `contract` checks remain required after push.

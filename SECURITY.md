@@ -2,6 +2,9 @@
 
 Background selection behavior is tested without UIKit to ensure invalid button
 tags fail closed before any color or accessibility state changes.
+The selection model is also exact-source verified as a pure switch so counters,
+custom raw-value initializers, process or environment access, filesystem access,
+clock access, output, and test-aware branches are rejected structurally.
 
 ## Supported Versions
 

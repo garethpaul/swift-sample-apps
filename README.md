@@ -85,8 +85,10 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   the latest selected color instead of allowing stale completion writes.
 - Background selection semantics keep one button selected and expose the same
   state through the selected accessibility trait.
-- Background selection behavior executes the production button-tag mapping for
-  both valid choices and fail-closed invalid tags on a standard Swift compiler.
+- Background selection behavior is guarded by exact-source structural
+  verification of an audited pure switch model, plus black-box regression
+  checks for valid choices, fail-closed invalid tags, malformed input, and a
+  4,097-call counter bypass.
 - Reduce Motion background changes apply the selected color immediately while
   retaining the interruptible cross-dissolve for other users. Runtime preference
   changes cancel an active transition and settle on the latest selected color.
@@ -159,7 +161,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `docs/plans/2026-06-16-background-selection-swift-tests.md` for the
   executable button-tag mapping boundary.
 - See `docs/plans/2026-06-19-background-test-execution-contract.md` for the
-  static guarantee that the compiled selection test binary is executed.
+  structural background selection proof and trusted-tool execution contract.
 - See `docs/plans/2026-06-19-background-native-deep-review.md` for the native
   XCTest, accessibility, animation ownership, and Reduce Motion review.
 

@@ -101,6 +101,8 @@ BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewCo
 BACKGROUND_SELECTION_SOURCE = ROOT / "background_switcher/background_switcher/BackgroundSelection.swift"
 BACKGROUND_SELECTION_TEST = ROOT / "Tests/BackgroundSelectionTests/main.swift"
 BACKGROUND_SELECTION_RUNNER = ROOT / "scripts/test-background-selection.sh"
+BACKGROUND_SELECTION_VERIFIER = ROOT / "scripts/verify-background-selection.py"
+TRUSTED_TOOL_RESOLVER = ROOT / "scripts/resolve-trusted-tools.sh"
 
 
 def tracked_files():
@@ -198,29 +200,27 @@ def hygiene_checks():
     root_declaration = "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))"
     if makefile.count(root_declaration) != 1:
         errors.append("Makefile must contain exactly one protected repository-root declaration")
-    tool_and_root_block = "\n".join((
-        "PYTHON ?= python3",
-        "XCODEBUILD ?= xcodebuild",
-        "SWIFTC ?= swiftc",
-        root_declaration,
-    ))
-    if makefile.count(tool_and_root_block) != 1:
-        errors.append("Makefile must keep tool overrides before the protected repository root")
     for contract in (
-        ".PHONY: build check lint native-test test verify",
+        ".PHONY: build check contract-test lint native-test test verify",
+        "override SHELL := /bin/sh",
+        "override PYTHON :=",
+        "override XCODEBUILD :=",
+        "override SWIFTC :=",
+        "trusted Python 3.9+ unavailable",
+        "trusted xcodebuild unavailable",
         "build: lint",
+        "contract-test:",
         "verify: lint test native-test build",
-        "check: verify",
+        "check: verify contract-test",
         '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
         '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
         '"$(ROOT)/scripts/test-background-selection.sh"',
-        'swiftc unavailable; skipping background selection Swift tests',
+        'Tests/test_background_selection_execution_contract.py',
         "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
         "native-test:",
         "-scheme background_switcher",
         "platform=iOS Simulator,name=iPhone 16 Pro,OS=latest",
-        "test;",
-        "xcodebuild unavailable; skipping native background switcher tests",
+        "CODE_SIGNING_ALLOWED=NO test",
         "-target background_switcher",
         "generic/platform=iOS Simulator",
         "CODE_SIGNING_ALLOWED=NO",
@@ -263,58 +263,133 @@ def hygiene_checks():
     else:
         selection_source = BACKGROUND_SELECTION_SOURCE.read_text(encoding="utf-8")
         for contract in (
-            "enum BackgroundSelection: Int, CaseIterable",
-            "case first = 1",
-            "case second = 2",
-            'return "Background\\(rawValue)"',
-            'return "Background \\(rawValue)"',
-            "return BackgroundSelection(rawValue: tag)",
+            "enum BackgroundSelection: CaseIterable",
+            "case first",
+            "case second",
+            'return "Background1"',
+            'return "Background2"',
+            'return "Background 1"',
+            'return "Background 2"',
+            "var buttonTag: Int",
+            "static func selection(forButtonTag tag: Int) -> BackgroundSelection?",
+            "switch tag",
+            "case 1:",
+            "return .first",
+            "case 2:",
+            "return .second",
             "return selection(forButtonTag: tag)?.key",
         ):
             if contract not in selection_source:
                 errors.append(f"background selection production contract is missing: {contract}")
-        if "import UIKit" in selection_source:
-            errors.append("background selection mapping must remain framework-independent")
+        for forbidden in (
+            "import ",
+            "RawRepresentable",
+            "rawValue",
+            "init?",
+            "static var",
+            "static let",
+            "CommandLine",
+            "ProcessInfo",
+            "FileManager",
+            "Date(",
+            "Dispatch",
+            "Thread",
+            "Bundle",
+            "FileHandle",
+            "print(",
+            "NSClassFromString",
+        ):
+            if forbidden in selection_source:
+                errors.append(f"background selection production source must not contain {forbidden!r}")
 
-    expected_cases = (
-        'expectKey("Background1", tag: 1, caseName: "first background")',
-        'expectKey("Background2", tag: 2, caseName: "second background")',
-        'expectKey(nil, tag: 0, caseName: "zero tag")',
-        'expectKey(nil, tag: -1, caseName: "negative tag")',
-        'expectKey(nil, tag: Int.min, caseName: "minimum integer tag")',
-        'expectKey(nil, tag: 3, caseName: "out-of-range tag")',
-    )
     if not BACKGROUND_SELECTION_TEST.exists():
-        errors.append("background selection executable test is missing")
+        errors.append("background selection observation adapter is missing")
     else:
         selection_test = BACKGROUND_SELECTION_TEST.read_text(encoding="utf-8")
-        for contract in expected_cases:
+        for contract in (
+            "import Foundation",
+            "FileHandle.standardOutput.write(data)",
+            "CommandLine.arguments.dropFirst()",
+            "BackgroundSelection.selection(forButtonTag: tag)",
+            "selection.buttonTag",
+            "selection.key",
+            "selection.title",
+            'return "\\(tag)|none"',
+            'return "\\(rawTag)|malformed"',
+        ):
             if contract not in selection_test:
-                errors.append(f"background selection executable case is missing: {contract}")
+                errors.append(f"background selection observation adapter contract is missing: {contract}")
+        for forbidden in (
+            'expectKey("Background1"',
+            "fatalError(",
+            "expected",
+            "XCTAssert",
+        ):
+            if forbidden in selection_test:
+                errors.append(f"background selection adapter must not own verdicts or expected mappings: {forbidden}")
 
     if not BACKGROUND_SELECTION_RUNNER.exists():
         errors.append("background selection test runner is missing")
     else:
         runner = BACKGROUND_SELECTION_RUNNER.read_text(encoding="utf-8")
         for contract in (
-            'BUILD_DIR=$(mktemp -d',
-            "trap cleanup 0",
+            "resolve-trusted-tools.sh",
+            "trusted Python 3.9+ unavailable",
+            "verify-background-selection.py",
             "trap 'exit 129' 1",
             "trap 'exit 130' 2",
             "trap 'exit 143' 15",
-            "background_switcher/background_switcher/BackgroundSelection.swift",
-            "Tests/BackgroundSelectionTests/main.swift",
-            '"$BUILD_DIR/background-selection-tests"',
         ):
             if contract not in runner:
                 errors.append(f"background selection runner contract is missing: {contract}")
-        executable = '"$BUILD_DIR/background-selection-tests"'
-        if f'-o {executable}' not in runner:
-            errors.append("background selection runner must compile the expected test binary")
-        if [line.strip() for line in runner.splitlines()].count(executable) != 1:
-            errors.append("background selection runner must execute the compiled test binary exactly once")
+        for forbidden in ("SWIFTC=", "command -v", "/usr/bin/env python"):
+            if forbidden in runner:
+                errors.append(f"background selection runner must not trust caller-controlled tools: {forbidden}")
         if not (BACKGROUND_SELECTION_RUNNER.stat().st_mode & 0o111):
             errors.append("background selection test runner must be executable")
+
+    if not BACKGROUND_SELECTION_VERIFIER.exists():
+        errors.append("background selection structural verifier is missing")
+    else:
+        verifier = BACKGROUND_SELECTION_VERIFIER.read_text(encoding="utf-8")
+        for contract in (
+            "EXPECTED_PRODUCTION_SOURCE",
+            "EXPECTED_ADAPTER_SOURCE",
+            "require_exact_source(PRODUCTION_SOURCE",
+            "require_exact_source(ADAPTER_SOURCE",
+            "exact-4097",
+            "known-broken production",
+            "/usr/bin/xcode-select",
+            "/usr/bin/xcrun",
+        ):
+            if contract not in verifier:
+                errors.append(f"background selection verifier contract is missing: {contract}")
+        static_result = subprocess.run(
+            [sys.executable, str(BACKGROUND_SELECTION_VERIFIER), "--static-only"],
+            cwd=str(ROOT),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if static_result.returncode != 0:
+            errors.append(f"background selection structural verifier failed: {static_result.stderr.strip()}")
+
+    if not TRUSTED_TOOL_RESOLVER.exists():
+        errors.append("trusted tool resolver is missing")
+    else:
+        resolver = TRUSTED_TOOL_RESOLVER.read_text(encoding="utf-8")
+        for contract in (
+            "resolve_python()",
+            "resolve_xcodebuild()",
+            "resolve_swiftc()",
+            "/usr/bin/xcode-select",
+            "/usr/bin/xcrun",
+            "python|xcodebuild|swiftc",
+        ):
+            if contract not in resolver:
+                errors.append(f"trusted tool resolver contract is missing: {contract}")
+        if not (TRUSTED_TOOL_RESOLVER.stat().st_mode & 0o111):
+            errors.append("trusted tool resolver must be executable")
 
     if str(BACKGROUND_TEST_EXECUTION_PLAN.relative_to(ROOT)) not in (ROOT / "README.md").read_text(encoding="utf-8"):
         errors.append("README must index background test execution contract evidence")

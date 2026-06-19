@@ -1,36 +1,49 @@
-.PHONY: build check lint native-test test verify
+.PHONY: build check contract-test lint native-test test verify
 
-PYTHON ?= python3
-XCODEBUILD ?= xcodebuild
-SWIFTC ?= swiftc
+override SHELL := /bin/sh
 override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+override UNAME_S := $(shell /usr/bin/uname -s 2>/dev/null || /bin/uname -s 2>/dev/null || uname -s)
+override PYTHON := $(shell "$(ROOT)/scripts/resolve-trusted-tools.sh" python 2>/dev/null)
+override XCODEBUILD := $(shell "$(ROOT)/scripts/resolve-trusted-tools.sh" xcodebuild 2>/dev/null)
+override SWIFTC := $(shell "$(ROOT)/scripts/resolve-trusted-tools.sh" swiftc 2>/dev/null)
 CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj
+REQUIRE_PYTHON = if [ -z "$(PYTHON)" ]; then printf '%s\n' "trusted Python 3.9+ unavailable" >&2; exit 1; fi
 
 lint:
-	$(PYTHON) "$(ROOT)/scripts/check-swift-samples.py" --mode hygiene
+	@$(REQUIRE_PYTHON)
+	"$(PYTHON)" "$(ROOT)/scripts/check-swift-samples.py" --mode hygiene
 
 test:
-	$(PYTHON) "$(ROOT)/scripts/check-swift-samples.py" --mode samples
-	@if command -v "$(SWIFTC)" >/dev/null 2>&1; then \
-		SWIFTC="$(SWIFTC)" "$(ROOT)/scripts/test-background-selection.sh"; \
-	else \
-		echo "swiftc unavailable; skipping background selection Swift tests"; \
-	fi
+	@$(REQUIRE_PYTHON)
+	"$(PYTHON)" "$(ROOT)/scripts/check-swift-samples.py" --mode samples
+	"$(ROOT)/scripts/test-background-selection.sh"
 
 native-test:
-	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \
-		"$(XCODEBUILD)" -project "$(CANARY_PROJECT)" -scheme background_switcher -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' CODE_SIGNING_ALLOWED=NO test; \
-	else \
-		echo "xcodebuild unavailable; skipping native background switcher tests"; \
+	@if [ "$(UNAME_S)" != "Darwin" ]; then \
+		echo "xcodebuild unavailable on non-Darwin; skipping native background switcher tests"; \
+		exit 0; \
+	fi; \
+	if [ -z "$(XCODEBUILD)" ]; then \
+		echo "trusted xcodebuild unavailable" >&2; \
+		exit 1; \
 	fi
+	"$(XCODEBUILD)" -project "$(CANARY_PROJECT)" -scheme background_switcher -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' CODE_SIGNING_ALLOWED=NO test
 
 build: lint
-	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \
-		"$(XCODEBUILD)" -project "$(CANARY_PROJECT)" -target background_switcher -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build; \
-	else \
-		echo "xcodebuild not found; static sample checks completed"; \
+	@if [ "$(UNAME_S)" != "Darwin" ]; then \
+		echo "xcodebuild unavailable on non-Darwin; static sample checks completed"; \
+		exit 0; \
+	fi; \
+	if [ -z "$(XCODEBUILD)" ]; then \
+		echo "trusted xcodebuild unavailable" >&2; \
+		exit 1; \
 	fi
+	"$(XCODEBUILD)" -project "$(CANARY_PROJECT)" -target background_switcher -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+
+contract-test:
+	@$(REQUIRE_PYTHON)
+	cd "$(ROOT)" && "$(PYTHON)" -m unittest Tests/test_background_selection_execution_contract.py
 
 verify: lint test native-test build
 
-check: verify
+check: verify contract-test

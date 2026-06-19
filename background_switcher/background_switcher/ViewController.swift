@@ -52,7 +52,7 @@ class ViewController: UIViewController {
             button.contentEdgeInsets = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
             button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
             button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)
-            button.tag = selection.rawValue
+            button.tag = selection.buttonTag
             backgroundButtons.append(button)
             buttonStack.addArrangedSubview(button)
             

@@ -1,17 +1,43 @@
-enum BackgroundSelection: Int, CaseIterable {
-    case first = 1
-    case second = 2
+enum BackgroundSelection: CaseIterable {
+    case first
+    case second
 
     var key: String {
-        return "Background\(rawValue)"
+        switch self {
+        case .first:
+            return "Background1"
+        case .second:
+            return "Background2"
+        }
     }
 
     var title: String {
-        return "Background \(rawValue)"
+        switch self {
+        case .first:
+            return "Background 1"
+        case .second:
+            return "Background 2"
+        }
+    }
+
+    var buttonTag: Int {
+        switch self {
+        case .first:
+            return 1
+        case .second:
+            return 2
+        }
     }
 
     static func selection(forButtonTag tag: Int) -> BackgroundSelection? {
-        return BackgroundSelection(rawValue: tag)
+        switch tag {
+        case 1:
+            return .first
+        case 2:
+            return .second
+        default:
+            return nil
+        }
     }
 
     static func key(forButtonTag tag: Int) -> String? {

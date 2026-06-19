@@ -2,6 +2,8 @@
 
 Background selection behavior should remain executable independently of UIKit
 while the sample preserves its visual transition and accessibility semantics.
+Its tag mapping should stay as an audited pure switch rather than a stateful or
+environment-dependent production path.
 
 Swift Sample Apps is an archive of small iOS examples, including background
 switching, basic notes, Facebook login, Parse setup, Swift object examples, and
@@ -40,6 +42,7 @@ Priority:
 - Keep background controls safe-area-aware, touch-accessible, and compatible
   with preferred text sizes
 - Preserve background selection semantics for assistive technology
+- Preserve structural verification for the pure background selection mapping
 - Preserve Reduce Motion background changes without weakening rapid selection
   behavior
 - Execute the native background-switcher XCTest target in current macOS CI
