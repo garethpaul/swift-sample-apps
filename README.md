@@ -73,7 +73,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   `background_switcher` canary for a generic iOS Simulator. Parse and Facebook
   samples remain static-only because their legacy SDK frameworks are absent.
 - GitHub Actions runs portable checks on Ubuntu 24.04 and the Swift 5/iOS 12
-  background-switcher build canary on macOS 15.
+  background-switcher build canary on macOS 15; both jobs use credential-free
+  checkout.
 - The background-switcher canvas and image follow the view bounds on different
   simulator sizes and rotations, while its controls remain centered.
 - Facebook user profile payloads are optional-cast before UI updates, malformed
@@ -81,7 +82,11 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   alert.
 - Hygiene checks also require completed canonical plans under `docs/plans`.
 - GitHub Actions runs the same portable hygiene and sample checks on Python
-  3.12 for pushes and pull requests.
+  3.12 for pushes and pull requests on fixed Ubuntu 24.04, with immutable
+  actions, read-only permissions, disabled checkout credential persistence,
+  concurrency cancellation, and bounded runtime.
+- Makefile verification is rooted at the repository path and can be invoked
+  from an external working directory.
 - Xcode's test action or `xcodebuild test` with the appropriate scheme and
   destination can be used on macOS for deeper verification.
 

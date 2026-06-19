@@ -12,9 +12,55 @@ CANONICAL_PLAN = DOCS_PLANS / "2026-06-08-swift-sample-apps-baseline.md"
 NOTE_INDEX_PLAN = DOCS_PLANS / "2026-06-09-note-index-guard.md"
 TODO_INDEX_PLAN = DOCS_PLANS / "2026-06-09-todo-index-guard.md"
 FACEBOOK_PAYLOAD_PLAN = DOCS_PLANS / "2026-06-10-facebook-payload-and-ci.md"
+CI_HARDENING_PLAN = DOCS_PLANS / "2026-06-12-portable-ci-hardening.md"
 BUILD_CANARY_PLAN = DOCS_PLANS / "2026-06-10-background-switcher-build.md"
 RESPONSIVE_CANARY_PLAN = DOCS_PLANS / "2026-06-10-responsive-background-switcher.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
+EXPECTED_WORKFLOW = """name: Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Run portable verification
+        run: make check
+
+  build:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Build background switcher canary
+        run: make build
+"""
 SAMPLES = (
     "background_switcher",
     "basic-note-taker",
@@ -74,6 +120,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-09-todo-index-guard.md is missing")
     if not FACEBOOK_PAYLOAD_PLAN.exists():
         errors.append("docs/plans/2026-06-10-facebook-payload-and-ci.md is missing")
+    if not CI_HARDENING_PLAN.exists():
+        errors.append("docs/plans/2026-06-12-portable-ci-hardening.md is missing")
     if not BUILD_CANARY_PLAN.exists():
         errors.append("docs/plans/2026-06-10-background-switcher-build.md is missing")
     if not RESPONSIVE_CANARY_PLAN.exists():
@@ -91,31 +139,18 @@ def hygiene_checks():
         if "/xcuserdata/" in path or path.endswith(".xcuserstate"):
             errors.append(f"tracked Xcode user state should be removed: {path}")
 
+    workflow_files = sorted((ROOT / ".github" / "workflows").glob("*.y*ml"))
+    if workflow_files != [WORKFLOW]:
+        errors.append("repository must keep exactly one reviewed GitHub Actions workflow")
     workflow = WORKFLOW.read_text(encoding="utf-8") if WORKFLOW.exists() else ""
-    for contract in (
-        "permissions:",
-        "contents: read",
-        "concurrency:",
-        "cancel-in-progress: true",
-        "contract:",
-        "runs-on: ubuntu-24.04",
-        "timeout-minutes: 5",
-        "build:",
-        "runs-on: macos-15",
-        "timeout-minutes: 15",
-        "workflow_dispatch:",
-        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
-        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
-        'python-version: "3.12"',
-        "run: make check",
-        "run: make build",
-    ):
-        if contract not in workflow:
-            errors.append(f"GitHub Actions workflow must keep contract: {contract}")
+    if workflow != EXPECTED_WORKFLOW:
+        errors.append("GitHub Actions workflow must match the reviewed portable verification contract")
 
     makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
     for contract in (
         "ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
+        '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
+        '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
         "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
         "-target background_switcher",
         "generic/platform=iOS Simulator",

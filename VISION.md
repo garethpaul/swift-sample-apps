@@ -30,8 +30,10 @@ Priority:
 - Keep Xcode framework and bridging-header paths repo-relative
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`
+- Keep portable CI fixed, credential-free, and reproducible from any cwd
 - Keep the background-switcher Swift 5 build canary green on current Xcode
 - Keep the background-switcher canvas responsive across current view sizes
+- Treat remaining Swift and SDK versions as legacy until documented per sample
 
 Next priorities:
 
