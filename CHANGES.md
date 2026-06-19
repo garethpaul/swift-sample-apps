@@ -2,6 +2,13 @@
 
 ## 2026-06-19
 
+- Replaced the static background-selection execution check with a harness-owned
+  black-box oracle, canonical compiler resolution, randomized fresh-process
+  observations, negative controls, and adversarial mutation coverage.
+- Extended the oracle with long variable-length, boundary, permuted, and
+  repeated-valid sequences so state hidden beyond the sixteenth call is caught.
+- Made Make ignore caller `PYTHON` and `XCODEBUILD` substitutions, resolve
+  reviewed absolute tools, and fail closed when required macOS tools are absent.
 - Replaced the legacy placeholder XCTest target with native tests for stable
   selection mapping, rapid taps, selected accessibility state, control labels
   and traits, and runtime Reduce Motion changes.

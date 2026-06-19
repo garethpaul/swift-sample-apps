@@ -72,6 +72,11 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   `xcodebuild` is installed, the `build` target compiles the self-contained
   `background_switcher` canary for a generic iOS Simulator. Parse and Facebook
   samples remain static-only because their legacy SDK frameworks are absent.
+- Background selection verification uses a harness-owned black-box oracle,
+  canonical compiler resolution, long variable-length randomized fresh-process
+  observations, repeated-valid stress sequences, and a mandatory known-broken
+  negative control. Make resolves trusted Python and Xcode tools independently
+  of caller overrides.
 - `make native-test` executes the checked-in `background_switcherTests` XCTest
   target on the latest installed iPhone 16 Pro simulator. `make check` includes
   this gate when Xcode is available and reports an explicit skip otherwise.
@@ -159,7 +164,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `docs/plans/2026-06-16-background-selection-swift-tests.md` for the
   executable button-tag mapping boundary.
 - See `docs/plans/2026-06-19-background-test-execution-contract.md` for the
-  static guarantee that the compiled selection test binary is executed.
+  strict black-box execution, compiler, and negative-control boundary.
 - See `docs/plans/2026-06-19-background-native-deep-review.md` for the native
   XCTest, accessibility, animation ownership, and Reduce Motion review.
 
