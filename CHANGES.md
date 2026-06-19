@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-16
+
+- Background selection behavior now executes production button-tag mapping for
+  valid and invalid inputs in the canonical verification path.
+
 ## 2026-06-14
 
 - Added Reduce Motion background changes that apply successful color choices

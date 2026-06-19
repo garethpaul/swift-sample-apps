@@ -2,6 +2,7 @@
 
 PYTHON ?= python3
 XCODEBUILD ?= xcodebuild
+SWIFTC ?= swiftc
 override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj
 
@@ -10,6 +11,11 @@ lint:
 
 test:
 	$(PYTHON) "$(ROOT)/scripts/check-swift-samples.py" --mode samples
+	@if command -v "$(SWIFTC)" >/dev/null 2>&1; then \
+		SWIFTC="$(SWIFTC)" "$(ROOT)/scripts/test-background-selection.sh"; \
+	else \
+		echo "swiftc unavailable; skipping background selection Swift tests"; \
+	fi
 
 build: lint
 	@if command -v "$(XCODEBUILD)" >/dev/null 2>&1; then \

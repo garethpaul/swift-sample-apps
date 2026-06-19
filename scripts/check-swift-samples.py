@@ -20,6 +20,7 @@ ACCESSIBLE_BACKGROUND_CONTROLS_PLAN = DOCS_PLANS / "2026-06-13-accessible-backgr
 BACKGROUND_SELECTION_SEMANTICS_PLAN = DOCS_PLANS / "2026-06-13-background-selection-semantics.md"
 ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 BACKGROUND_REDUCE_MOTION_PLAN = DOCS_PLANS / "2026-06-14-background-reduce-motion.md"
+BACKGROUND_SELECTION_TEST_PLAN = DOCS_PLANS / "2026-06-16-background-selection-swift-tests.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -63,6 +64,8 @@ jobs:
           persist-credentials: false
       - name: Show Xcode version
         run: xcodebuild -version
+      - name: Run background selection behavior tests
+        run: make test
       - name: Build background switcher canary
         run: make build
 """
@@ -92,6 +95,9 @@ TODO_LIST_CONTROLLER = "todo-list/todo-list/FirstViewController.swift"
 TODO_TASK_MANAGER = "todo-list/todo-list/TaskManager.swift"
 SWIFT_OBJECTS_CONTROLLER = "swift-objects-example/swift-objects-example/ViewController.swift"
 BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewController.swift"
+BACKGROUND_SELECTION_SOURCE = ROOT / "background_switcher/background_switcher/BackgroundSelection.swift"
+BACKGROUND_SELECTION_TEST = ROOT / "Tests/BackgroundSelectionTests/main.swift"
+BACKGROUND_SELECTION_RUNNER = ROOT / "scripts/test-background-selection.sh"
 
 
 def tracked_files():
@@ -142,6 +148,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-14-make-root-override-protection.md is missing")
     if not BACKGROUND_REDUCE_MOTION_PLAN.exists():
         errors.append("docs/plans/2026-06-14-background-reduce-motion.md is missing")
+    if not BACKGROUND_SELECTION_TEST_PLAN.exists():
+        errors.append("docs/plans/2026-06-16-background-selection-swift-tests.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -158,6 +166,17 @@ def hygiene_checks():
         ):
             if evidence not in reduce_motion_plan:
                 errors.append(f"{BACKGROUND_REDUCE_MOTION_PLAN.relative_to(ROOT)} must record verification evidence: {evidence}")
+    if BACKGROUND_SELECTION_TEST_PLAN.exists():
+        selection_test_plan = BACKGROUND_SELECTION_TEST_PLAN.read_text(encoding="utf-8")
+        for evidence in (
+            "Status: Completed",
+            "repository and external-directory `make check` passed",
+            "hostile background selection mutations were rejected",
+            "swiftc is unavailable",
+            "hosted macOS",
+        ):
+            if evidence not in selection_test_plan:
+                errors.append(f"{BACKGROUND_SELECTION_TEST_PLAN.relative_to(ROOT)} must record verification evidence: {evidence}")
 
     for path in tracked_files():
         if "/xcuserdata/" in path or path.endswith(".xcuserstate"):
@@ -177,6 +196,7 @@ def hygiene_checks():
     tool_and_root_block = "\n".join((
         "PYTHON ?= python3",
         "XCODEBUILD ?= xcodebuild",
+        "SWIFTC ?= swiftc",
         root_declaration,
     ))
     if makefile.count(tool_and_root_block) != 1:
@@ -188,6 +208,8 @@ def hygiene_checks():
         "check: verify",
         '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
         '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
+        '"$(ROOT)/scripts/test-background-selection.sh"',
+        'swiftc unavailable; skipping background selection Swift tests',
         "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
         "-target background_switcher",
         "generic/platform=iOS Simulator",
@@ -210,6 +232,10 @@ def hygiene_checks():
     ):
         if contract not in canary_project:
             errors.append(f"background switcher project must keep current setting: {contract}")
+    if canary_project.count("BackgroundSelection.swift in Sources") != 2:
+        errors.append("background switcher project must compile BackgroundSelection.swift exactly once")
+    if canary_project.count("/* BackgroundSelection.swift */ =") != 1:
+        errors.append("background switcher project must keep one BackgroundSelection.swift file reference")
 
     canary_source = (ROOT / "background_switcher/background_switcher/ViewController.swift").read_text(encoding="utf-8")
     for contract in ("for i in buttonTitles.indices", "#selector(buttonClicked(_:))", "UIView.transition("):
@@ -217,6 +243,65 @@ def hygiene_checks():
             errors.append(f"background switcher must keep Swift 5 source contract: {contract}")
     if "width: CGFloat = 320" in canary_source or "height: CGFloat = 568" in canary_source:
         errors.append("background switcher must not use a fixed legacy device canvas")
+    if "guard let imageSelector = BackgroundSelection.key(forButtonTag: sender.tag) else {" not in canary_source:
+        errors.append("background switcher controller must delegate tag mapping to BackgroundSelection")
+    if 'let imageSelector = "Background\\(sender.tag)"' in canary_source:
+        errors.append("background switcher controller must not interpolate unchecked button tags")
+
+    if not BACKGROUND_SELECTION_SOURCE.exists():
+        errors.append("background selection production source is missing")
+    else:
+        selection_source = BACKGROUND_SELECTION_SOURCE.read_text(encoding="utf-8")
+        for contract in (
+            'private static let keys = ["Background1", "Background2"]',
+            "guard tag > 0 else {",
+            "let index = tag - 1",
+            "guard keys.indices.contains(index) else {",
+            "return keys[index]",
+        ):
+            if contract not in selection_source:
+                errors.append(f"background selection production contract is missing: {contract}")
+        if "import UIKit" in selection_source:
+            errors.append("background selection mapping must remain framework-independent")
+
+    expected_cases = (
+        'expectKey("Background1", tag: 1, caseName: "first background")',
+        'expectKey("Background2", tag: 2, caseName: "second background")',
+        'expectKey(nil, tag: 0, caseName: "zero tag")',
+        'expectKey(nil, tag: -1, caseName: "negative tag")',
+        'expectKey(nil, tag: Int.min, caseName: "minimum integer tag")',
+        'expectKey(nil, tag: 3, caseName: "out-of-range tag")',
+    )
+    if not BACKGROUND_SELECTION_TEST.exists():
+        errors.append("background selection executable test is missing")
+    else:
+        selection_test = BACKGROUND_SELECTION_TEST.read_text(encoding="utf-8")
+        for contract in expected_cases:
+            if contract not in selection_test:
+                errors.append(f"background selection executable case is missing: {contract}")
+
+    if not BACKGROUND_SELECTION_RUNNER.exists():
+        errors.append("background selection test runner is missing")
+    else:
+        runner = BACKGROUND_SELECTION_RUNNER.read_text(encoding="utf-8")
+        for contract in (
+            'BUILD_DIR=$(mktemp -d',
+            "trap cleanup 0",
+            "trap 'exit 129' 1",
+            "trap 'exit 130' 2",
+            "trap 'exit 143' 15",
+            "background_switcher/background_switcher/BackgroundSelection.swift",
+            "Tests/BackgroundSelectionTests/main.swift",
+            '"$BUILD_DIR/background-selection-tests"',
+        ):
+            if contract not in runner:
+                errors.append(f"background selection runner contract is missing: {contract}")
+        if not (BACKGROUND_SELECTION_RUNNER.stat().st_mode & 0o111):
+            errors.append("background selection test runner must be executable")
+
+    for document in ("README.md", "SECURITY.md", "VISION.md", "CHANGES.md"):
+        if "Background selection behavior" not in (ROOT / document).read_text(encoding="utf-8"):
+            errors.append(f"{document} must document executable background selection behavior")
     for contract in (
         "UIView(frame: view.bounds)",
         "UIImageView(frame: contentView.bounds)",

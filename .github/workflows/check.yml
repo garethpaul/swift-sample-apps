@@ -40,5 +40,7 @@ jobs:
           persist-credentials: false
       - name: Show Xcode version
         run: xcodebuild -version
+      - name: Run background selection behavior tests
+        run: make test
       - name: Build background switcher canary
         run: make build

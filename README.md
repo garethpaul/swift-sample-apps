@@ -82,6 +82,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   the latest selected color instead of allowing stale completion writes.
 - Background selection semantics keep one button selected and expose the same
   state through the selected accessibility trait.
+- Background selection behavior executes the production button-tag mapping for
+  both valid choices and fail-closed invalid tags on a standard Swift compiler.
 - Reduce Motion background changes apply the selected color immediately while
   retaining the interruptible cross-dissolve for other users.
 - Facebook user profile payloads are optional-cast before UI updates, malformed
@@ -150,6 +152,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   repository-root selection across all Make aliases.
 - See `docs/plans/2026-06-14-background-reduce-motion.md` for the system motion
   preference behavior of successful background selections.
+- See `docs/plans/2026-06-16-background-selection-swift-tests.md` for the
+  executable button-tag mapping boundary.
 
 ## Contributing
 
