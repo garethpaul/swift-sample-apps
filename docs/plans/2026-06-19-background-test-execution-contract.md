@@ -4,33 +4,36 @@ Status: Completed
 
 ## Context
 
-The background-selection runner contract required the compiled binary path to
-appear in `scripts/test-background-selection.sh`, but that path appears in both
-the compiler output argument and the standalone execution command. Replacing
-the execution command therefore passed `make check` on hosts without `swiftc`
-because the compiler output still satisfied the broad substring check.
+The default branch accepted zero-assertion and false-green mutations because a
+static checker verified source text while the runner trusted caller-controlled
+compiler resolution and a Swift executable owned both expectations and verdicts.
 
 ## Requirements
 
-- Preserve the production selection mapping and executable Swift cases.
-- Require the compiler output to target the expected selection test binary.
-- Require exactly one standalone command that executes the compiled binary.
-- Keep the portable contract effective when `swiftc` is unavailable.
-- Preserve temporary-directory cleanup and hosted iOS Simulator validation.
+- Keep mapping expectations and verdicts outside production and the Swift adapter.
+- Execute randomized and permuted observations in isolated fresh processes.
+- Resolve the canonical Swift compiler independently of caller `PATH` and `SWIFTC`.
+- Reject production access to process, environment, filesystem, clock, or output APIs.
+- Require malformed-input and known-broken-production negative controls.
+- Preserve native XCTest, Xcode build, and simulator validation.
 
 ## Work Completed
 
-- Added a distinct contract for the Swift compiler output argument.
-- Added a line-oriented contract requiring exactly one standalone execution of
-  the compiled selection test binary.
-- Indexed the maintenance evidence in README and CHANGES.
+- Replaced assertion-owning Swift code with a raw black-box observation adapter.
+- Added an external Python harness that owns expectations, randomizes sequence
+  order, compiles opaque real and broken sources, and executes each sequence in
+  a fresh process.
+- Anchored Apple compiler discovery to `/usr/bin/xcode-select` and
+  `/usr/bin/xcrun`; Linux uses reviewed absolute Swift toolchain locations.
+- Added production and adapter boundary checks plus adversarial mutation tests.
+- Made the Make test target double-colon based so an appended single-colon
+  recipe fails instead of silently overriding verification.
 
 ## Verification
 
-- The missing-execution mutation passed `make check` before the contract fix.
-- Missing, duplicated, and mismatched-output mutations are rejected after the
-  fix on a host without `swiftc`.
+- Exact default reproduced all known zero-assertion and false-green families,
+  including test-aware production and caller-controlled `PATH` compiler forgery.
 - Repository and external-directory `make check` passed.
-- Digest-pinned Swift executable tests passed from repository and external
-  working directories.
-- Exact-head hosted `build` and `contract` checks remain required after push.
+- Python, Swift, native XCTest, Xcode builds, simulator installation, and launch passed.
+- Hostile runner, harness, adapter, production, Make, and compiler mutations were rejected.
+- Current-tree and full-history credential scans completed; provider-side status remains external.

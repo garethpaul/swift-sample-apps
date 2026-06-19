@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
 import re
 import subprocess
 import sys
@@ -101,6 +102,15 @@ BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewCo
 BACKGROUND_SELECTION_SOURCE = ROOT / "background_switcher/background_switcher/BackgroundSelection.swift"
 BACKGROUND_SELECTION_TEST = ROOT / "Tests/BackgroundSelectionTests/main.swift"
 BACKGROUND_SELECTION_RUNNER = ROOT / "scripts/test-background-selection.sh"
+BACKGROUND_SELECTION_VERIFIER = ROOT / "scripts/verify-background-selection.py"
+BACKGROUND_SELECTION_CONTRACT = ROOT / "Tests/test_background_selection_execution_contract.py"
+BACKGROUND_EXECUTION_CONTRACT_DIGESTS = {
+    "Makefile": "868da2f95e548b70c3f2f5314e559609d61123733f1ad38f0152114d2a253a26",
+    "Tests/BackgroundSelectionTests/main.swift": "4d27f28bbac89f52562202f851fedc8774f33d44dbe48babff35fca17e52bafc",
+    "Tests/test_background_selection_execution_contract.py": "aa04aee8413147a372e6d11bd4ed9c16525e3bfcc698c6e13ba15d73fbd73db0",
+    "scripts/test-background-selection.sh": "b9112b3236fed2f44917efb67faa182a311aa7dc2049033b6228a37331a42827",
+    "scripts/verify-background-selection.py": "1178c9afe969ca8664edd6700a0bbce1fb54d2787f0f30f6b29dd35e0617e0fe",
+}
 
 
 def tracked_files():
@@ -201,7 +211,6 @@ def hygiene_checks():
     tool_and_root_block = "\n".join((
         "PYTHON ?= python3",
         "XCODEBUILD ?= xcodebuild",
-        "SWIFTC ?= swiftc",
         root_declaration,
     ))
     if makefile.count(tool_and_root_block) != 1:
@@ -214,7 +223,8 @@ def hygiene_checks():
         '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
         '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
         '"$(ROOT)/scripts/test-background-selection.sh"',
-        'swiftc unavailable; skipping background selection Swift tests',
+        'PYTHON="$(PYTHON)" "$(ROOT)/scripts/test-background-selection.sh"',
+        '"$(ROOT)/Tests/test_background_selection_execution_contract.py" -v',
         "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
         "native-test:",
         "-scheme background_switcher",
@@ -275,46 +285,64 @@ def hygiene_checks():
                 errors.append(f"background selection production contract is missing: {contract}")
         if "import UIKit" in selection_source:
             errors.append("background selection mapping must remain framework-independent")
+        for forbidden in (
+            "import ", "CommandLine", "ProcessInfo", "Bundle", "Thread", "Dispatch",
+            "FileManager", "FileHandle", "getenv", "getpid", "argc", "argv",
+            "dlopen", "dlsym", "NSClassFromString", "_isDebugAssertConfiguration",
+            "environment", "Date(", "UUID(", "print(", "stdout", "stderr",
+            "#if", "DEBUG", "TEST",
+        ):
+            if forbidden in selection_source:
+                errors.append(f"background selection production source must not observe or forge tests: {forbidden}")
 
-    expected_cases = (
-        'expectKey("Background1", tag: 1, caseName: "first background")',
-        'expectKey("Background2", tag: 2, caseName: "second background")',
-        'expectKey(nil, tag: 0, caseName: "zero tag")',
-        'expectKey(nil, tag: -1, caseName: "negative tag")',
-        'expectKey(nil, tag: Int.min, caseName: "minimum integer tag")',
-        'expectKey(nil, tag: 3, caseName: "out-of-range tag")',
-    )
     if not BACKGROUND_SELECTION_TEST.exists():
-        errors.append("background selection executable test is missing")
+        errors.append("background selection black-box adapter is missing")
     else:
         selection_test = BACKGROUND_SELECTION_TEST.read_text(encoding="utf-8")
-        for contract in expected_cases:
+        for contract in (
+            "Array(CommandLine.arguments.dropFirst())",
+            "BackgroundSelection.selection(forButtonTag: tag)",
+            "selection.rawValue", "selection.key", "selection.title",
+            "invalid integer tag",
+        ):
             if contract not in selection_test:
-                errors.append(f"background selection executable case is missing: {contract}")
+                errors.append(f"background selection black-box adapter contract is missing: {contract}")
+        for forbidden in ('"Background1"', '"Background2"', "tag ==", "switch tag"):
+            if forbidden in selection_test:
+                errors.append(f"background selection adapter must not own expectations: {forbidden}")
 
     if not BACKGROUND_SELECTION_RUNNER.exists():
         errors.append("background selection test runner is missing")
     else:
         runner = BACKGROUND_SELECTION_RUNNER.read_text(encoding="utf-8")
         for contract in (
-            'BUILD_DIR=$(mktemp -d',
-            "trap cleanup 0",
-            "trap 'exit 129' 1",
-            "trap 'exit 130' 2",
-            "trap 'exit 143' 15",
-            "background_switcher/background_switcher/BackgroundSelection.swift",
-            "Tests/BackgroundSelectionTests/main.swift",
-            '"$BUILD_DIR/background-selection-tests"',
+            "set -eu",
+            'ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)',
+            'exec "$PYTHON" "$ROOT_DIR/scripts/verify-background-selection.py" --root "$ROOT_DIR"',
         ):
             if contract not in runner:
                 errors.append(f"background selection runner contract is missing: {contract}")
-        executable = '"$BUILD_DIR/background-selection-tests"'
-        if f'-o {executable}' not in runner:
-            errors.append("background selection runner must compile the expected test binary")
-        if [line.strip() for line in runner.splitlines()].count(executable) != 1:
-            errors.append("background selection runner must execute the compiled test binary exactly once")
         if not (BACKGROUND_SELECTION_RUNNER.stat().st_mode & 0o111):
             errors.append("background selection test runner must be executable")
+
+    if not BACKGROUND_SELECTION_VERIFIER.exists():
+        errors.append("background selection harness-owned verifier is missing")
+    else:
+        verifier = BACKGROUND_SELECTION_VERIFIER.read_text(encoding="utf-8")
+        for contract in (
+            'int.from_bytes(os.urandom(8), "big")', "random.Random(seed)",
+            'Path("/usr/bin/xcrun")', "actual != expected",
+            "verify_malformed_input(real_binary)",
+            "mandatory known-broken negative control was accepted",
+            "Background selection black-box verification passed",
+        ):
+            if contract not in verifier:
+                errors.append(f"background selection verifier contract is missing: {contract}")
+        if not (BACKGROUND_SELECTION_VERIFIER.stat().st_mode & 0o111):
+            errors.append("background selection verifier must be executable")
+
+    if not BACKGROUND_SELECTION_CONTRACT.exists():
+        errors.append("background selection adversarial contract suite is missing")
 
     if str(BACKGROUND_TEST_EXECUTION_PLAN.relative_to(ROOT)) not in (ROOT / "README.md").read_text(encoding="utf-8"):
         errors.append("README must index background test execution contract evidence")
@@ -350,6 +378,14 @@ def hygiene_checks():
 
 def samples_checks():
     errors = []
+    for relative_path, expected_digest in BACKGROUND_EXECUTION_CONTRACT_DIGESTS.items():
+        candidate = ROOT / relative_path
+        if not candidate.exists():
+            errors.append(f"background selection execution contract file is missing: {relative_path}")
+            continue
+        actual_digest = hashlib.sha256(candidate.read_bytes()).hexdigest()
+        if actual_digest != expected_digest:
+            errors.append(f"background selection execution contract changed without review: {relative_path}")
     for sample in SAMPLES:
         project_files = list((ROOT / sample).glob("*.xcodeproj/project.pbxproj"))
         swift_files = list((ROOT / sample).glob("**/*.swift"))
@@ -380,7 +416,7 @@ def samples_checks():
             errors.append(f"synchronous network image loading must be removed from {path}")
         if path.endswith(".swift") and INSECURE_SWIFT_URL_RE.search(text):
             errors.append(f"insecure remote URL literals must be replaced with local or HTTPS placeholders in {path}")
-        if path.endswith(".swift") and has_active_swift_print(text):
+        if path.endswith(".swift") and path != "Tests/BackgroundSelectionTests/main.swift" and has_active_swift_print(text):
             errors.append(f"active Swift print/println debug logging must be removed from {path}")
         if path.endswith(".pbxproj") and LOCAL_XCODE_PATH_RE.search(text):
             errors.append(f"local Xcode paths must be replaced with repo-relative placeholders in {path}")
