@@ -1,27 +1,37 @@
-#!/usr/bin/env sh
+#!/bin/sh
 set -eu
 
-ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-SWIFTC=${SWIFTC:-swiftc}
-
-if ! command -v "$SWIFTC" >/dev/null 2>&1; then
-  printf '%s\n' "Swift compiler not found: $SWIFTC" >&2
-  exit 1
+SCRIPT_DIR=${0%/*}
+if [ "$SCRIPT_DIR" = "$0" ]; then
+  SCRIPT_DIR=.
+fi
+ROOT_DIR=$(CDPATH=; cd -- "$SCRIPT_DIR/.." && pwd -P)
+SWIFTC=$(/bin/sh "$ROOT_DIR/scripts/resolve-trusted-tools.sh" swiftc)
+SDKROOT=
+if [ -x /usr/bin/xcrun ]; then
+  SDKROOT=$(/usr/bin/xcrun --show-sdk-path --sdk macosx 2>/dev/null || true)
 fi
 
-BUILD_DIR=$(mktemp -d "${TMPDIR:-/tmp}/background-selection-tests.XXXXXX")
+BUILD_DIR=$(/usr/bin/mktemp -d "${TMPDIR:-/tmp}/background-selection-tests.XXXXXX")
 cleanup() {
-  rm -rf -- "$BUILD_DIR"
+  /bin/rm -rf -- "$BUILD_DIR"
 }
 trap cleanup 0
 trap 'exit 129' 1
 trap 'exit 130' 2
 trap 'exit 143' 15
 
-"$SWIFTC" \
-  "$ROOT_DIR/background_switcher/background_switcher/BackgroundSelection.swift" \
-  "$ROOT_DIR/Tests/BackgroundSelectionTests/main.swift" \
-  -o "$BUILD_DIR/background-selection-tests"
+if [ -n "$SDKROOT" ]; then
+  "$SWIFTC" -sdk "$SDKROOT" \
+    "$ROOT_DIR/background_switcher/background_switcher/BackgroundSelection.swift" \
+    "$ROOT_DIR/Tests/BackgroundSelectionTests/main.swift" \
+    -o "$BUILD_DIR/background-selection-tests"
+else
+  "$SWIFTC" \
+    "$ROOT_DIR/background_switcher/background_switcher/BackgroundSelection.swift" \
+    "$ROOT_DIR/Tests/BackgroundSelectionTests/main.swift" \
+    -o "$BUILD_DIR/background-selection-tests"
+fi
 "$BUILD_DIR/background-selection-tests"
 
 printf '%s\n' "Background selection Swift tests passed."
