@@ -20,7 +20,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        backgroundDict = Dictionary(uniqueKeysWithValues: BackgroundSelection.allCases.map {
+        backgroundDict = Dictionary(uniqueKeysWithValues: BackgroundSelection.supportedCases().map {
             ($0.key, backgroundColor(for: $0))
         })
         let contentView = UIView(frame: view.bounds)
@@ -38,7 +38,7 @@ class ViewController: UIViewController {
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(buttonStack)
         
-        for selection in BackgroundSelection.allCases {
+        for selection in BackgroundSelection.supportedCases() {
             
             let button = UIButton(type: .system)
             button.setTitle(selection.title, for: .normal)
@@ -52,7 +52,7 @@ class ViewController: UIViewController {
             button.contentEdgeInsets = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
             button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44).isActive = true
             button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)
-            button.tag = selection.rawValue
+            button.tag = selection.buttonTag
             backgroundButtons.append(button)
             buttonStack.addArrangedSubview(button)
             
