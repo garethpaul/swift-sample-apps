@@ -23,6 +23,8 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -31,18 +33,27 @@ jobs:
         run: make check
 
   build:
+    needs: contract
     runs-on: macos-15
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Check out repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
       - name: Show Xcode version
         run: xcodebuild -version
-      - name: Run background selection behavior tests
-        run: make test
-      - name: Run native background switcher tests
-        run: make native-test
-      - name: Build background switcher canary
-        run: make build
+      - name: Run fail-closed verification before Xcode
+        run: make check
+      - name: Run Release XCTest through preflight
+        run: make native-test-release
+      - name: Build Debug configuration through preflight
+        run: make build-debug
+      - name: Build Release configuration through preflight
+        run: make build-release
+      - name: Analyze Debug configuration through preflight
+        run: make analyze-debug
+      - name: Analyze Release configuration through preflight
+        run: make analyze-release

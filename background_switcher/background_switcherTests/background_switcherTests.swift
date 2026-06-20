@@ -3,6 +3,9 @@ import XCTest
 
 final class BackgroundSwitcherTests: XCTestCase {
     func testSelectionMappingIsStable() {
+        XCTAssertEqual(BackgroundSelection.supportedCases(), [.first, .second])
+        XCTAssertEqual(BackgroundSelection.first.buttonTag, 1)
+        XCTAssertEqual(BackgroundSelection.second.buttonTag, 2)
         XCTAssertEqual(BackgroundSelection.selection(forButtonTag: 1), .first)
         XCTAssertEqual(BackgroundSelection.selection(forButtonTag: 2), .second)
         XCTAssertNil(BackgroundSelection.selection(forButtonTag: 0))
@@ -65,6 +68,38 @@ final class BackgroundSwitcherTests: XCTestCase {
         XCTAssertNil(viewController.imageView.layer.animationKeys())
         XCTAssertEqual(viewController.imageView.backgroundColor, viewController.backgroundColor(for: .second))
         XCTAssertTrue(buttons[1].isSelected)
+    }
+
+    func testSelectionMappingRemainsCorrectAfterRepeatedAndDelayedAccess() {
+        let viewController = makeViewController()
+        viewController.reduceMotionEnabledProvider = { true }
+        let buttons = backgroundButtons(in: viewController.view)
+
+        for index in 0..<5_000 {
+            let selection = index.isMultiple(of: 2) ? BackgroundSelection.first : .second
+            let button = index.isMultiple(of: 2) ? buttons[0] : buttons[1]
+            button.sendActions(for: .touchUpInside)
+
+            XCTAssertEqual(BackgroundSelection.selection(forButtonTag: button.tag), selection)
+            XCTAssertEqual(viewController.backgroundDict[selection.key], viewController.backgroundColor(for: selection))
+            XCTAssertEqual(viewController.imageView.backgroundColor, viewController.backgroundColor(for: selection))
+        }
+
+        let delayedCheck = expectation(description: "mapping remains stable after delayed access")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+            XCTAssertEqual(BackgroundSelection.selection(forButtonTag: 1), .first)
+            XCTAssertEqual(BackgroundSelection.selection(forButtonTag: 2), .second)
+            XCTAssertEqual(
+                viewController.backgroundDict[BackgroundSelection.first.key],
+                viewController.backgroundColor(for: .first)
+            )
+            XCTAssertEqual(
+                viewController.backgroundDict[BackgroundSelection.second.key],
+                viewController.backgroundColor(for: .second)
+            )
+            delayedCheck.fulfill()
+        }
+        wait(for: [delayedCheck], timeout: 1.0)
     }
 
     private func makeViewController() -> ViewController {
