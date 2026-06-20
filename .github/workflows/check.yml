@@ -17,32 +17,99 @@ concurrency:
 jobs:
   contract:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Check out repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.12"
-      - name: Run portable verification
-        run: make check
+      - name: Materialize repository-owned external trust bundle
+        env:
+          ORACLE_B64: ${{ vars.SWIFT_SAMPLE_V12_ORACLE_B64 }}
+          ORACLE_SHA256: ${{ vars.SWIFT_SAMPLE_V12_ORACLE_SHA256 }}
+          MANIFEST_B64: ${{ vars.SWIFT_SAMPLE_V12_MANIFEST_B64 }}
+          MANIFEST_SHA256: ${{ vars.SWIFT_SAMPLE_V12_MANIFEST_SHA256 }}
+        run: |
+          python - <<'PY'
+          import base64, hashlib, os
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"]) / "swift-sample-v12-trust"
+          root.mkdir(parents=True, exist_ok=False)
+          for name, payload_name, digest_name in (
+              ("oracle.py", "ORACLE_B64", "ORACLE_SHA256"),
+              ("manifest.json", "MANIFEST_B64", "MANIFEST_SHA256"),
+          ):
+              payload = os.environ.get(payload_name, "")
+              expected = os.environ.get(digest_name, "")
+              if not payload or len(expected) != 64:
+                  raise SystemExit(f"missing external trust variable: {payload_name}/{digest_name}")
+              data = base64.b64decode(payload, validate=True)
+              if hashlib.sha256(data).hexdigest() != expected:
+                  raise SystemExit(f"external trust digest mismatch: {name}")
+              (root / name).write_bytes(data)
+          with Path(os.environ["GITHUB_ENV"]).open("a", encoding="utf-8") as environment:
+              environment.write(f"TRUSTED_ORACLE_SHA256={os.environ['ORACLE_SHA256']}\n")
+              environment.write(f"TRUSTED_MANIFEST_SHA256={os.environ['MANIFEST_SHA256']}\n")
+          PY
+      - name: Run externally sealed portable verification
+        run: make check TRUSTED_ORACLE="$RUNNER_TEMP/swift-sample-v12-trust/oracle.py" TRUSTED_MANIFEST="$RUNNER_TEMP/swift-sample-v12-trust/manifest.json"
 
   build:
+    needs: contract
     runs-on: macos-15
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+      - name: Materialize repository-owned external trust bundle
+        env:
+          ORACLE_B64: ${{ vars.SWIFT_SAMPLE_V12_ORACLE_B64 }}
+          ORACLE_SHA256: ${{ vars.SWIFT_SAMPLE_V12_ORACLE_SHA256 }}
+          MANIFEST_B64: ${{ vars.SWIFT_SAMPLE_V12_MANIFEST_B64 }}
+          MANIFEST_SHA256: ${{ vars.SWIFT_SAMPLE_V12_MANIFEST_SHA256 }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, os
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"]) / "swift-sample-v12-trust"
+          root.mkdir(parents=True, exist_ok=False)
+          for name, payload_name, digest_name in (
+              ("oracle.py", "ORACLE_B64", "ORACLE_SHA256"),
+              ("manifest.json", "MANIFEST_B64", "MANIFEST_SHA256"),
+          ):
+              payload = os.environ.get(payload_name, "")
+              expected = os.environ.get(digest_name, "")
+              if not payload or len(expected) != 64:
+                  raise SystemExit(f"missing external trust variable: {payload_name}/{digest_name}")
+              data = base64.b64decode(payload, validate=True)
+              if hashlib.sha256(data).hexdigest() != expected:
+                  raise SystemExit(f"external trust digest mismatch: {name}")
+              (root / name).write_bytes(data)
+          with Path(os.environ["GITHUB_ENV"]).open("a", encoding="utf-8") as environment:
+              environment.write(f"TRUSTED_ORACLE_SHA256={os.environ['ORACLE_SHA256']}\n")
+              environment.write(f"TRUSTED_MANIFEST_SHA256={os.environ['MANIFEST_SHA256']}\n")
+          PY
       - name: Show Xcode version
         run: xcodebuild -version
-      - name: Run background selection behavior tests
-        run: make test
-      - name: Run native background switcher tests
-        run: make native-test
-      - name: Build background switcher canary
-        run: make build
+      - name: Run externally sealed verification before Xcode
+        run: make check TRUSTED_ORACLE="$RUNNER_TEMP/swift-sample-v12-trust/oracle.py" TRUSTED_MANIFEST="$RUNNER_TEMP/swift-sample-v12-trust/manifest.json"
+      - name: Run Release XCTest through external preflight
+        run: make native-test-release TRUSTED_ORACLE="$RUNNER_TEMP/swift-sample-v12-trust/oracle.py" TRUSTED_MANIFEST="$RUNNER_TEMP/swift-sample-v12-trust/manifest.json"
+      - name: Build Debug configuration through external preflight
+        run: make build-debug TRUSTED_ORACLE="$RUNNER_TEMP/swift-sample-v12-trust/oracle.py" TRUSTED_MANIFEST="$RUNNER_TEMP/swift-sample-v12-trust/manifest.json"
+      - name: Build Release configuration through external preflight
+        run: make build-release TRUSTED_ORACLE="$RUNNER_TEMP/swift-sample-v12-trust/oracle.py" TRUSTED_MANIFEST="$RUNNER_TEMP/swift-sample-v12-trust/manifest.json"
+      - name: Analyze Debug configuration through external preflight
+        run: make analyze-debug TRUSTED_ORACLE="$RUNNER_TEMP/swift-sample-v12-trust/oracle.py" TRUSTED_MANIFEST="$RUNNER_TEMP/swift-sample-v12-trust/manifest.json"
+      - name: Analyze Release configuration through external preflight
+        run: make analyze-release TRUSTED_ORACLE="$RUNNER_TEMP/swift-sample-v12-trust/oracle.py" TRUSTED_MANIFEST="$RUNNER_TEMP/swift-sample-v12-trust/manifest.json"
