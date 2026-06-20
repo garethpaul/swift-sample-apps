@@ -3,6 +3,9 @@ import XCTest
 
 final class BackgroundSwitcherTests: XCTestCase {
     func testSelectionMappingIsStable() {
+        XCTAssertEqual(BackgroundSelection.supportedCases(), [.first, .second])
+        XCTAssertEqual(BackgroundSelection.first.buttonTag, 1)
+        XCTAssertEqual(BackgroundSelection.second.buttonTag, 2)
         XCTAssertEqual(BackgroundSelection.selection(forButtonTag: 1), .first)
         XCTAssertEqual(BackgroundSelection.selection(forButtonTag: 2), .second)
         XCTAssertNil(BackgroundSelection.selection(forButtonTag: 0))
