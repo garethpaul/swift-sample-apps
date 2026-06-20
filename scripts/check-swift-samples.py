@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import argparse
 import re
 import subprocess
@@ -101,10 +101,28 @@ BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewCo
 BACKGROUND_SELECTION_SOURCE = ROOT / "background_switcher/background_switcher/BackgroundSelection.swift"
 BACKGROUND_SELECTION_TEST = ROOT / "Tests/BackgroundSelectionTests/main.swift"
 BACKGROUND_SELECTION_RUNNER = ROOT / "scripts/test-background-selection.sh"
+BACKGROUND_SWITCHER_PROJECT = ROOT / "background_switcher/background_switcher.xcodeproj/project.pbxproj"
+TRUSTED_TOOLS_RUNNER = ROOT / "scripts/resolve-trusted-tools.sh"
+GIT = Path("/usr/bin/git")
+BACKGROUND_APP_TARGET = "background_switcher"
+BACKGROUND_TEST_TARGET = "background_switcherTests"
+EXPECTED_BACKGROUND_APP_SOURCES = (
+    "BackgroundSelection.swift",
+    "ViewController.swift",
+    "AppDelegate.swift",
+)
+EXPECTED_BACKGROUND_TEST_SOURCES = ("background_switcherTests.swift",)
+BACKGROUND_APP_SOURCE_PATHS = {
+    "BackgroundSelection.swift": ROOT / "background_switcher/background_switcher/BackgroundSelection.swift",
+    "ViewController.swift": ROOT / "background_switcher/background_switcher/ViewController.swift",
+    "AppDelegate.swift": ROOT / "background_switcher/background_switcher/AppDelegate.swift",
+}
 
 
 def tracked_files():
-    output = subprocess.check_output(["git", "ls-files"], cwd=str(ROOT), text=True)
+    if not GIT.exists():
+        raise RuntimeError("trusted git is missing at /usr/bin/git")
+    output = subprocess.check_output([str(GIT), "ls-files"], cwd=str(ROOT), text=True)
     return output.splitlines()
 
 
@@ -123,6 +141,127 @@ def has_active_swift_print(text):
         if SWIFT_PRINT_RE.search(stripped):
             return True
     return False
+
+
+def swift_code_without_comments(text):
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+    return "\n".join(line.split("//", 1)[0] for line in text.splitlines())
+
+
+def target_sources(project_text, target_name):
+    target = re.search(
+        rf"[A-Z0-9]+ /\* {re.escape(target_name)} \*/ = \{{\n"
+        r"\s+isa = PBXNativeTarget;(?P<body>.*?)\n\s+\};",
+        project_text,
+        flags=re.DOTALL,
+    )
+    if not target:
+        raise ValueError(f"missing PBXNativeTarget {target_name}")
+    phase = re.search(r"buildPhases = \(\s*([A-Z0-9]+) /\* Sources \*/", target.group("body"))
+    if not phase:
+        raise ValueError(f"missing Sources phase for {target_name}")
+    phase_id = phase.group(1)
+    phase_block = re.search(
+        rf"{re.escape(phase_id)} /\* Sources \*/ = \{{(?P<body>.*?)\n\s+\}};",
+        project_text,
+        flags=re.DOTALL,
+    )
+    if not phase_block:
+        raise ValueError(f"missing Sources phase block for {target_name}")
+    files = re.search(r"files = \((?P<files>.*?)\);", phase_block.group("body"), flags=re.DOTALL)
+    if not files:
+        raise ValueError(f"missing Sources files list for {target_name}")
+    return tuple(
+        match.group(1)
+        for match in re.finditer(r"/\* ([^*]+?) in Sources \*/", files.group("files"))
+    )
+
+
+def top_level_state_lines(code):
+    depth = 0
+    violations = []
+    for line_number, line in enumerate(code.splitlines(), start=1):
+        stripped = line.strip()
+        if depth == 0 and re.match(r"(?:private\s+|fileprivate\s+|internal\s+|public\s+)?(?:var|let)\s+", stripped):
+            violations.append(line_number)
+        depth += line.count("{") - line.count("}")
+        if depth < 0:
+            depth = 0
+    return violations
+
+
+def background_compiled_source_checks(project_text):
+    errors = []
+    try:
+        app_sources = target_sources(project_text, BACKGROUND_APP_TARGET)
+        test_sources = target_sources(project_text, BACKGROUND_TEST_TARGET)
+    except ValueError as exc:
+        return [str(exc)]
+
+    if app_sources != EXPECTED_BACKGROUND_APP_SOURCES:
+        errors.append(
+            "background switcher app target must compile exactly "
+            f"{', '.join(EXPECTED_BACKGROUND_APP_SOURCES)}; found {', '.join(app_sources)}"
+        )
+    if test_sources != EXPECTED_BACKGROUND_TEST_SOURCES:
+        errors.append(
+            "background switcher test target must compile exactly "
+            f"{', '.join(EXPECTED_BACKGROUND_TEST_SOURCES)}; found {', '.join(test_sources)}"
+        )
+
+    compiled_paths = []
+    for source_name in app_sources:
+        compiled_paths.append(
+            BACKGROUND_APP_SOURCE_PATHS.get(
+                source_name,
+                ROOT / "background_switcher/background_switcher" / source_name,
+            )
+        )
+
+    selection_definition_count = 0
+    forbidden_tokens = (
+        "CommandLine",
+        "ProcessInfo",
+        ".environment",
+        "getenv",
+        "FileManager",
+        "Date(",
+        "Dispatch",
+        "Thread",
+        "Bundle",
+        "XCTest",
+        "#if DEBUG",
+        "#if TEST",
+        "SIMULATOR",
+        "TARGET_OS",
+        "dlopen",
+        "dlsym",
+    )
+    for source_path in compiled_paths:
+        if not source_path.exists():
+            errors.append(f"compiled background switcher source is missing: {source_path.relative_to(ROOT)}")
+            continue
+        code = swift_code_without_comments(source_path.read_text(encoding="utf-8"))
+        relative = source_path.relative_to(ROOT)
+        if re.search(r"\bextension\s+BackgroundSelection\b", code):
+            errors.append(f"compiled background selection source must not extend BackgroundSelection: {relative}")
+        for forbidden in forbidden_tokens:
+            if forbidden in code:
+                errors.append(f"compiled background selection source must not use {forbidden}: {relative}")
+        for line_number in top_level_state_lines(code):
+            errors.append(f"compiled background selection source must not declare top-level state: {relative}:{line_number}")
+        if re.search(r"\ballCases\b", code) or "CaseIterable" in code:
+            errors.append(f"compiled background selection source must not expose overridable allCases/CaseIterable: {relative}")
+        if re.search(r"\brawValue\b", code):
+            errors.append(f"compiled background selection source must not use RawRepresentable/rawValue mapping: {relative}")
+        selection_definition_count += len(re.findall(r"\bstatic\s+func\s+selection\s*\(\s*forButtonTag\b", code))
+
+    if selection_definition_count != 1:
+        errors.append(
+            "background selection mapping must have exactly one compiled "
+            f"selection(forButtonTag:) definition; found {selection_definition_count}"
+        )
+    return errors
 
 
 def hygiene_checks():
@@ -198,29 +337,29 @@ def hygiene_checks():
     root_declaration = "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))"
     if makefile.count(root_declaration) != 1:
         errors.append("Makefile must contain exactly one protected repository-root declaration")
-    tool_and_root_block = "\n".join((
-        "PYTHON ?= python3",
-        "XCODEBUILD ?= xcodebuild",
-        "SWIFTC ?= swiftc",
-        root_declaration,
-    ))
-    if makefile.count(tool_and_root_block) != 1:
-        errors.append("Makefile must keep tool overrides before the protected repository root")
     for contract in (
-        ".PHONY: build check lint native-test test verify",
+        "override SHELL := /bin/sh",
+        ".SHELLFLAGS := -eu -c",
+        "override TRUSTED_TOOLS := $(ROOT)/scripts/resolve-trusted-tools.sh",
+        "override PYTHON := $(shell /bin/sh \"$(TRUSTED_TOOLS)\" python 2>/dev/null || true)",
+        "override SWIFTC := $(shell /bin/sh \"$(TRUSTED_TOOLS)\" swiftc 2>/dev/null || true)",
+        "override XCODEBUILD := $(shell /bin/sh \"$(TRUSTED_TOOLS)\" xcodebuild 2>/dev/null || true)",
+        ".PHONY: build check contract-test lint native-test require-python test verify",
+        "require-python:",
         "build: lint",
-        "verify: lint test native-test build",
+        "contract-test: require-python",
+        "verify: lint test contract-test native-test build",
         "check: verify",
         '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
         '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
-        '"$(ROOT)/scripts/test-background-selection.sh"',
-        'swiftc unavailable; skipping background selection Swift tests',
+        '/bin/sh "$(ROOT)/scripts/test-background-selection.sh"',
+        'trusted swiftc unavailable; skipping background selection Swift tests',
         "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
         "native-test:",
         "-scheme background_switcher",
         "platform=iOS Simulator,name=iPhone 16 Pro,OS=latest",
         "test;",
-        "xcodebuild unavailable; skipping native background switcher tests",
+        "trusted xcodebuild unavailable; skipping native background switcher tests",
         "-target background_switcher",
         "generic/platform=iOS Simulator",
         "CODE_SIGNING_ALLOWED=NO",
@@ -234,7 +373,13 @@ def hygiene_checks():
     if "for project in */*.xcodeproj" in makefile:
         errors.append("Makefile must not build samples that require absent legacy SDK frameworks")
 
-    canary_project = (ROOT / "background_switcher/background_switcher.xcodeproj/project.pbxproj").read_text(encoding="utf-8")
+    if not TRUSTED_TOOLS_RUNNER.exists():
+        errors.append("trusted tool resolver is missing")
+    elif TRUSTED_TOOLS_RUNNER.read_text(encoding="utf-8").splitlines()[0] != "#!/bin/sh":
+        errors.append("trusted tool resolver must start with /bin/sh")
+
+    canary_project = BACKGROUND_SWITCHER_PROJECT.read_text(encoding="utf-8")
+    errors.extend(background_compiled_source_checks(canary_project))
     for contract in (
         "IPHONEOS_DEPLOYMENT_TARGET = 12.0;",
         "SWIFT_VERSION = 5.0;",
@@ -243,14 +388,18 @@ def hygiene_checks():
         if contract not in canary_project:
             errors.append(f"background switcher project must keep current setting: {contract}")
     if canary_project.count("BackgroundSelection.swift in Sources") != 2:
-        errors.append("background switcher project must compile BackgroundSelection.swift exactly once")
+        errors.append("background switcher project must compile BackgroundSelection.swift exactly once in the app target")
     if canary_project.count("/* BackgroundSelection.swift */ =") != 1:
         errors.append("background switcher project must keep one BackgroundSelection.swift file reference")
 
     canary_source = (ROOT / "background_switcher/background_switcher/ViewController.swift").read_text(encoding="utf-8")
-    for contract in ("for selection in BackgroundSelection.allCases", "#selector(buttonClicked(_:))", "UIView.transition("):
+    for contract in ("for selection in BackgroundSelection.supportedCases", "#selector(buttonClicked(_:))", "UIView.transition("):
         if contract not in canary_source:
             errors.append(f"background switcher must keep Swift 5 source contract: {contract}")
+    if "BackgroundSelection.allCases" in canary_source:
+        errors.append("background switcher must not use overridable BackgroundSelection.allCases")
+    if "button.tag = selection.buttonTag" not in canary_source:
+        errors.append("background switcher buttons must use the explicit selection buttonTag")
     if "width: CGFloat = 320" in canary_source or "height: CGFloat = 568" in canary_source:
         errors.append("background switcher must not use a fixed legacy device canvas")
     if "guard let selection = BackgroundSelection.selection(forButtonTag: sender.tag) else {" not in canary_source:
@@ -263,12 +412,22 @@ def hygiene_checks():
     else:
         selection_source = BACKGROUND_SELECTION_SOURCE.read_text(encoding="utf-8")
         for contract in (
-            "enum BackgroundSelection: Int, CaseIterable",
-            "case first = 1",
-            "case second = 2",
-            'return "Background\\(rawValue)"',
-            'return "Background \\(rawValue)"',
-            "return BackgroundSelection(rawValue: tag)",
+            "enum BackgroundSelection {",
+            "case first",
+            "case second",
+            "static let supportedCases: [BackgroundSelection] = [.first, .second]",
+            "var buttonTag: Int",
+            "case .first:",
+            "case .second:",
+            'return "Background1"',
+            'return "Background2"',
+            'return "Background 1"',
+            'return "Background 2"',
+            "case 1:",
+            "return .first",
+            "case 2:",
+            "return .second",
+            "return nil",
             "return selection(forButtonTag: tag)?.key",
         ):
             if contract not in selection_source:
@@ -297,7 +456,12 @@ def hygiene_checks():
     else:
         runner = BACKGROUND_SELECTION_RUNNER.read_text(encoding="utf-8")
         for contract in (
-            'BUILD_DIR=$(mktemp -d',
+            "#!/bin/sh",
+            'BUILD_DIR=$(/usr/bin/mktemp -d',
+            'SWIFTC=$(/bin/sh "$ROOT_DIR/scripts/resolve-trusted-tools.sh" swiftc)',
+            'SDKROOT=$(/usr/bin/xcrun --show-sdk-path --sdk macosx',
+            '/usr/bin/mktemp',
+            '/bin/rm -rf -- "$BUILD_DIR"',
             "trap cleanup 0",
             "trap 'exit 129' 1",
             "trap 'exit 130' 2",
@@ -308,6 +472,8 @@ def hygiene_checks():
         ):
             if contract not in runner:
                 errors.append(f"background selection runner contract is missing: {contract}")
+        if "#!/usr/bin/env sh" in runner or "command -v" in runner:
+            errors.append("background selection runner must not trust env sh or PATH tool lookup")
         executable = '"$BUILD_DIR/background-selection-tests"'
         if f'-o {executable}' not in runner:
             errors.append("background selection runner must compile the expected test binary")
