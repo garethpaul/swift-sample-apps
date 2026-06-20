@@ -27,6 +27,8 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.12"
+      - name: Run trusted bootstrap unit tests
+        run: /usr/bin/python3 -I -S -B -m unittest discover -s trusted-verifier/tests -p 'test_*.py' -v
       - name: Run portable verification
         run: make check
 

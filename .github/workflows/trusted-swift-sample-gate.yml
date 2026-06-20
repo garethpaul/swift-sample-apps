@@ -1,0 +1,93 @@
+name: Trusted Swift Sample Structural Gate
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trusted-swift-sample-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  base-owned-structural-gate:
+    name: base-owned-structural-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment:
+      name: swift-sample-trusted-verifier-v1
+    steps:
+      - name: Check out trusted workflow commit
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          repository: ${{ github.event.repository.full_name }}
+          ref: ${{ github.workflow_sha }}
+          path: trusted-base
+          fetch-depth: 1
+          persist-credentials: false
+          set-safe-directory: false
+          submodules: false
+          lfs: false
+
+      - name: Verify protected environment policy
+        shell: /bin/bash --noprofile --norc -p -euo pipefail {0}
+        env:
+          REPOSITORY_SLUG: ${{ github.event.repository.full_name }}
+          ENVIRONMENT_NAME: swift-sample-trusted-verifier-v1
+        run: |
+          exec /usr/bin/env -i \
+            HOME=/tmp/swift-sample-workflow-home \
+            LANG=C.UTF-8 \
+            LC_ALL=C.UTF-8 \
+            PATH=/usr/bin:/bin \
+            REPOSITORY_SLUG="$REPOSITORY_SLUG" \
+            ENVIRONMENT_NAME="$ENVIRONMENT_NAME" \
+            /usr/bin/python3 -I -S -B trusted-base/trusted-verifier/verify_environment.py \
+              --repository "$REPOSITORY_SLUG" \
+              --environment "$ENVIRONMENT_NAME"
+
+      - name: Check out candidate as untrusted data
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: candidate
+          fetch-depth: 2
+          persist-credentials: false
+          set-safe-directory: false
+          submodules: false
+          lfs: false
+
+      - name: Verify exact reviewed semantic bytes
+        shell: /bin/bash --noprofile --norc -p -euo pipefail {0}
+        env:
+          TRUSTED_BASE_SHA: ${{ github.workflow_sha }}
+          CANDIDATE_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          TRUSTED_REPOSITORY_SLUG: ${{ github.event.repository.full_name }}
+          CANDIDATE_REPOSITORY_SLUG: ${{ github.event.pull_request.head.repo.full_name }}
+          TRUSTED_FETCH_URL: https://github.com/${{ github.event.repository.full_name }}.git
+          CANDIDATE_FETCH_URL: https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git
+        run: |
+          exec /usr/bin/env -i \
+            HOME=/tmp/swift-sample-workflow-home \
+            LANG=C.UTF-8 \
+            LC_ALL=C.UTF-8 \
+            PATH=/usr/bin:/bin \
+            TRUSTED_BASE_SHA="$TRUSTED_BASE_SHA" \
+            CANDIDATE_HEAD_SHA="$CANDIDATE_HEAD_SHA" \
+            TRUSTED_REPOSITORY_SLUG="$TRUSTED_REPOSITORY_SLUG" \
+            CANDIDATE_REPOSITORY_SLUG="$CANDIDATE_REPOSITORY_SLUG" \
+            TRUSTED_FETCH_URL="$TRUSTED_FETCH_URL" \
+            CANDIDATE_FETCH_URL="$CANDIDATE_FETCH_URL" \
+            /bin/sh -p trusted-base/trusted-verifier/run-hermetic.sh \
+              --base-repository trusted-base \
+              --candidate-repository candidate \
+              --base-sha "$TRUSTED_BASE_SHA" \
+              --head-sha "$CANDIDATE_HEAD_SHA" \
+              --trusted-fetch-url "$TRUSTED_FETCH_URL" \
+              --candidate-fetch-url "$CANDIDATE_FETCH_URL" \
+              --trusted-repository-slug "$TRUSTED_REPOSITORY_SLUG" \
+              --candidate-repository-slug "$CANDIDATE_REPOSITORY_SLUG" \
+              --receipt /tmp/swift-sample-trusted-receipt.json
