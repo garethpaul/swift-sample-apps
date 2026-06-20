@@ -1,0 +1,52 @@
+{
+  "bootstrap_exact_default": "e0b72f53b6ef73989b8dcd12473c8476c92baf02",
+  "diagnostic_check_context": "Trusted Swift Sample Structural Gate / base-owned-structural-gate",
+  "expected_files": {
+    "background_switcher/background_switcher/BackgroundSelection.swift": {
+      "mode": "100644",
+      "sha256": "b53dc83a4648c24fed7382f7cf35574d03644103dc70586f640ceb7497114bb4",
+      "template": "expected/BackgroundSelection.swift.txt"
+    },
+    "background_switcher/background_switcher/ViewController.swift": {
+      "mode": "100644",
+      "sha256": "aecdf5718c40e1655925c1eb9119234a447d33184edafc68af47863ae70341ef",
+      "template": "expected/ViewController.swift.txt"
+    },
+    "background_switcher/background_switcherTests/background_switcherTests.swift": {
+      "mode": "100644",
+      "sha256": "15703acf447749f3101eade646cac10accfe3c7eb78a76bae995f6c64bfefb3f",
+      "template": "expected/background_switcherTests.swift.txt"
+    }
+  },
+  "merge_authority": {
+    "diagnostic_check_context_is_authoritative": false,
+    "environment": "swift-sample-trusted-verifier-v1",
+    "kind": "required_protected_environment_deployment",
+    "required_environment_branch": "master"
+  },
+  "rejected_bootstrap_ancestors": [
+    "9a0b133eced571290e0412c1362167dcb7055470",
+    "b1a674a6501de4d5897b676cc4593aa6ce262bc6",
+    "b60eb8eacb49423b9ded67438a4d83526f3514e2",
+    "ee433cb249aba68530c70eaf667eb730aa60ebd1",
+    "d3699856d110195719e347090592873a31649383",
+    "8e082f230ca94ba9210d32a962bbe6c5eff6c5fb",
+    "be4471456e0a1a3fd541ad640bd472c3e5305faf",
+    "4b1fdd3feba20da012e08c9d38ecf0dac968d8fc",
+    "8960adf609f411247b1b3a9ce579e933f6bc45cd",
+    "0b52064818bac4f251b406a9cfbbace036aa09e0",
+    "f1287d256877b1f3b579f48cd6bb2ca1acfd92b1",
+    "298e2cf9ac059a95ba550af10943dea5e21f6541"
+  ],
+  "schema": 1,
+  "trusted_paths": [
+    ".github/workflows/trusted-swift-sample-gate.yml",
+    "trusted-verifier/policy.json",
+    "trusted-verifier/run-hermetic.sh",
+    "trusted-verifier/verify_candidate.py",
+    "trusted-verifier/verify_environment.py",
+    "trusted-verifier/expected/BackgroundSelection.swift.txt",
+    "trusted-verifier/expected/ViewController.swift.txt",
+    "trusted-verifier/expected/background_switcherTests.swift.txt"
+  ]
+}

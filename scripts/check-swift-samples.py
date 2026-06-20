@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
 import re
 import subprocess
 import sys
@@ -23,6 +24,8 @@ BACKGROUND_REDUCE_MOTION_PLAN = DOCS_PLANS / "2026-06-14-background-reduce-motio
 BACKGROUND_SELECTION_TEST_PLAN = DOCS_PLANS / "2026-06-16-background-selection-swift-tests.md"
 BACKGROUND_TEST_EXECUTION_PLAN = DOCS_PLANS / "2026-06-19-background-test-execution-contract.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
+TRUSTED_WORKFLOW = ROOT / ".github" / "workflows" / "trusted-swift-sample-gate.yml"
+TRUSTED_WORKFLOW_SHA256 = "5bdb048350bec5aa33ca106100b91c105acc7bf4438a3156c5a31b3f35de518e"
 EXPECTED_WORKFLOW = """name: Check
 
 on:
@@ -52,6 +55,8 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.12"
+      - name: Run trusted bootstrap unit tests
+        run: /usr/bin/python3 -I -S -B -m unittest discover -s trusted-verifier/tests -p 'test_*.py' -v
       - name: Run portable verification
         run: make check
 
@@ -101,6 +106,11 @@ BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewCo
 BACKGROUND_SELECTION_SOURCE = ROOT / "background_switcher/background_switcher/BackgroundSelection.swift"
 BACKGROUND_SELECTION_TEST = ROOT / "Tests/BackgroundSelectionTests/main.swift"
 BACKGROUND_SELECTION_RUNNER = ROOT / "scripts/test-background-selection.sh"
+BACKGROUND_NATIVE_TEST = ROOT / "background_switcher/background_switcherTests/background_switcherTests.swift"
+TRUSTED_EXPECTED_ROOT = ROOT / "trusted-verifier" / "expected"
+FUTURE_BACKGROUND_SELECTION = TRUSTED_EXPECTED_ROOT / "BackgroundSelection.swift.txt"
+FUTURE_VIEW_CONTROLLER = TRUSTED_EXPECTED_ROOT / "ViewController.swift.txt"
+FUTURE_NATIVE_TEST = TRUSTED_EXPECTED_ROOT / "background_switcherTests.swift.txt"
 
 
 def tracked_files():
@@ -188,11 +198,14 @@ def hygiene_checks():
             errors.append(f"tracked Xcode user state should be removed: {path}")
 
     workflow_files = sorted((ROOT / ".github" / "workflows").glob("*.y*ml"))
-    if workflow_files != [WORKFLOW]:
-        errors.append("repository must keep exactly one reviewed GitHub Actions workflow")
+    if workflow_files != sorted((WORKFLOW, TRUSTED_WORKFLOW)):
+        errors.append("repository must keep exactly the two reviewed GitHub Actions workflows")
     workflow = WORKFLOW.read_text(encoding="utf-8") if WORKFLOW.exists() else ""
     if workflow != EXPECTED_WORKFLOW:
         errors.append("GitHub Actions workflow must match the reviewed portable verification contract")
+    trusted_workflow = TRUSTED_WORKFLOW.read_bytes() if TRUSTED_WORKFLOW.exists() else b""
+    if hashlib.sha256(trusted_workflow).hexdigest() != TRUSTED_WORKFLOW_SHA256:
+        errors.append("trusted verifier workflow must match the reviewed bootstrap contract")
 
     makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
     root_declaration = "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))"
@@ -248,7 +261,23 @@ def hygiene_checks():
         errors.append("background switcher project must keep one BackgroundSelection.swift file reference")
 
     canary_source = (ROOT / "background_switcher/background_switcher/ViewController.swift").read_text(encoding="utf-8")
-    for contract in ("for selection in BackgroundSelection.allCases", "#selector(buttonClicked(_:))", "UIView.transition("):
+    future_paths = (FUTURE_BACKGROUND_SELECTION, FUTURE_VIEW_CONTROLLER, FUTURE_NATIVE_TEST)
+    if not all(path.is_file() for path in future_paths):
+        errors.append("trusted future semantic templates are missing")
+        future_semantics = False
+    else:
+        future_semantics = (
+            BACKGROUND_SELECTION_SOURCE.read_bytes() == FUTURE_BACKGROUND_SELECTION.read_bytes()
+            and (ROOT / "background_switcher/background_switcher/ViewController.swift").read_bytes()
+            == FUTURE_VIEW_CONTROLLER.read_bytes()
+            and BACKGROUND_NATIVE_TEST.read_bytes() == FUTURE_NATIVE_TEST.read_bytes()
+        )
+    loop_contract = (
+        "for selection in BackgroundSelection.supportedCases()"
+        if future_semantics
+        else "for selection in BackgroundSelection.allCases"
+    )
+    for contract in (loop_contract, "#selector(buttonClicked(_:))", "UIView.transition("):
         if contract not in canary_source:
             errors.append(f"background switcher must keep Swift 5 source contract: {contract}")
     if "width: CGFloat = 320" in canary_source or "height: CGFloat = 568" in canary_source:
@@ -260,7 +289,7 @@ def hygiene_checks():
 
     if not BACKGROUND_SELECTION_SOURCE.exists():
         errors.append("background selection production source is missing")
-    else:
+    elif not future_semantics:
         selection_source = BACKGROUND_SELECTION_SOURCE.read_text(encoding="utf-8")
         for contract in (
             "enum BackgroundSelection: Int, CaseIterable",
