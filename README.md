@@ -75,6 +75,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make native-test` executes the checked-in `background_switcherTests` XCTest
   target on the latest installed iPhone 16 Pro simulator. `make check` includes
   this gate when Xcode is available and reports an explicit skip otherwise.
+- `make root-test` exercises repository-root, shell, Make metadata, trusted
+  tool-value, and non-executing-mode authority without requiring Xcode or Swift.
 - GitHub Actions runs portable checks on Ubuntu 24.04 and the Swift 5/iOS 12
   background-switcher build canary on macOS 15; both jobs use credential-free
   checkout.
@@ -154,6 +156,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   selected-state accessibility coverage.
 - See `docs/plans/2026-06-14-make-root-override-protection.md` for authoritative
   repository-root selection across all Make aliases.
+- See `docs/plans/2026-06-21-make-authority-isolation.md` for quoted checkout
+  paths, fixed shell authority, Make mode rejection, and startup boundaries.
 - See `docs/plans/2026-06-14-background-reduce-motion.md` for the system motion
   preference behavior of successful background selections.
 - See `docs/plans/2026-06-16-background-selection-swift-tests.md` for the

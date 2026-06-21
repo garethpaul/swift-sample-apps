@@ -22,6 +22,7 @@ ROOT_OVERRIDE_PLAN = DOCS_PLANS / "2026-06-14-make-root-override-protection.md"
 BACKGROUND_REDUCE_MOTION_PLAN = DOCS_PLANS / "2026-06-14-background-reduce-motion.md"
 BACKGROUND_SELECTION_TEST_PLAN = DOCS_PLANS / "2026-06-16-background-selection-swift-tests.md"
 BACKGROUND_TEST_EXECUTION_PLAN = DOCS_PLANS / "2026-06-19-background-test-execution-contract.md"
+MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -53,7 +54,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run portable verification
-        run: make check
+        run: /usr/bin/make check
 
   build:
     runs-on: macos-15
@@ -66,11 +67,11 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
       - name: Run background selection behavior tests
-        run: make test
+        run: /usr/bin/make test
       - name: Run native background switcher tests
-        run: make native-test
+        run: /usr/bin/make native-test
       - name: Build background switcher canary
-        run: make build
+        run: /usr/bin/make build
 """
 SAMPLES = (
     "background_switcher",
@@ -101,6 +102,7 @@ BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewCo
 BACKGROUND_SELECTION_SOURCE = ROOT / "background_switcher/background_switcher/BackgroundSelection.swift"
 BACKGROUND_SELECTION_TEST = ROOT / "Tests/BackgroundSelectionTests/main.swift"
 BACKGROUND_SELECTION_RUNNER = ROOT / "scripts/test-background-selection.sh"
+MAKE_AUTHORITY_RUNNER = ROOT / "scripts/test-makefile-root.sh"
 
 
 def tracked_files():
@@ -155,6 +157,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-16-background-selection-swift-tests.md is missing")
     if not BACKGROUND_TEST_EXECUTION_PLAN.exists():
         errors.append("docs/plans/2026-06-19-background-test-execution-contract.md is missing")
+    if not MAKE_AUTHORITY_PLAN.exists():
+        errors.append("docs/plans/2026-06-21-make-authority-isolation.md is missing")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -195,27 +199,43 @@ def hygiene_checks():
         errors.append("GitHub Actions workflow must match the reviewed portable verification contract")
 
     makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
-    root_declaration = "override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))"
+    root_declaration = "override ROOT := $(shell path='$(subst ','\"'\"',$(value MAKEFILE_LIST))'; path=$$(printf '%s' \"$$path\" | /usr/bin/sed 's/^ //'); [ -f \"$$path\" ] || exit 1; directory=$$(/usr/bin/dirname -- \"$$path\"); CDPATH= cd -- \"$$directory\" && /bin/pwd -P)"
     if makefile.count(root_declaration) != 1:
         errors.append("Makefile must contain exactly one protected repository-root declaration")
-    tool_and_root_block = "\n".join((
+    tool_contracts = (
         "PYTHON ?= python3",
         "XCODEBUILD ?= xcodebuild",
         "SWIFTC ?= swiftc",
-        root_declaration,
-    ))
-    if makefile.count(tool_and_root_block) != 1:
+        "override PYTHON := $(value PYTHON)",
+        "override XCODEBUILD := $(value XCODEBUILD)",
+        "override SWIFTC := $(value SWIFTC)",
+        "export PYTHON XCODEBUILD SWIFTC",
+        "override SHELL := /bin/sh",
+        "override .SHELLFLAGS := -c",
+    )
+    if any(makefile.count(contract) != 1 for contract in tool_contracts):
+        errors.append("Makefile must keep one authoritative declaration for each trusted tool and shell setting")
+    elif max(makefile.index(contract) for contract in tool_contracts) > makefile.index(root_declaration):
         errors.append("Makefile must keep tool overrides before the protected repository root")
     for contract in (
-        ".PHONY: build check lint native-test test verify",
+        ".DEFAULT_GOAL := check",
+        ".PHONY: __repository-make-authority build check lint native-test root-test test verify",
+        ".SECONDEXPANSION:",
+        "$(error MAKEFLAGS must not be overridden for repository verification)",
+        "$(error non-executing or error-ignoring MAKEFLAGS are not supported for repository verification)",
+        "$(error MAKEFILES must be empty; repository verification requires this Makefile to be loaded alone)",
+        "$(error MAKEFILE_LIST must not be overridden)",
+        "$(error repository Makefile path could not be resolved)",
         "build: lint",
-        "verify: lint test native-test build",
+        "root-test:",
+        "verify: root-test lint test native-test build",
         "check: verify",
-        '"$(ROOT)/scripts/check-swift-samples.py" --mode hygiene',
-        '"$(ROOT)/scripts/check-swift-samples.py" --mode samples',
-        '"$(ROOT)/scripts/test-background-selection.sh"',
+        '"$$ROOT/scripts/check-swift-samples.py" --mode hygiene',
+        '"$$ROOT/scripts/check-swift-samples.py" --mode samples',
+        '"$$ROOT/scripts/test-background-selection.sh"',
+        '"$$ROOT/scripts/test-makefile-root.sh"',
         'swiftc unavailable; skipping background selection Swift tests',
-        "CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
+        "override CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
         "native-test:",
         "-scheme background_switcher",
         "platform=iOS Simulator,name=iPhone 16 Pro,OS=latest",
@@ -231,6 +251,35 @@ def hygiene_checks():
         errors.append("README must index Make root override protection evidence")
     if "docs/plans/2026-06-14-background-reduce-motion.md" not in (ROOT / "README.md").read_text(encoding="utf-8"):
         errors.append("README must index background Reduce Motion evidence")
+    if str(MAKE_AUTHORITY_PLAN.relative_to(ROOT)) not in (ROOT / "README.md").read_text(encoding="utf-8"):
+        errors.append("README must index Make authority isolation evidence")
+    if not MAKE_AUTHORITY_RUNNER.is_file():
+        errors.append("Make authority runner is missing")
+    else:
+        authority_runner = MAKE_AUTHORITY_RUNNER.read_text(encoding="utf-8")
+        for contract in (
+            "35 executed target/authority cases",
+            "1 literal-dollar tool case",
+            "1 raw tool Make-syntax rejection",
+            "2 MAKEFILE_LIST rejections",
+            "2 contained startup-boundary cases",
+            "10 mode-flag rejections",
+            "SWIFT_SAMPLES_BACKTICK_MARKER",
+        ):
+            if contract not in authority_runner:
+                errors.append(f"Make authority runner contract is missing: {contract}")
+        if not (MAKE_AUTHORITY_RUNNER.stat().st_mode & 0o111):
+            errors.append("Make authority runner must be executable")
+    if MAKE_AUTHORITY_PLAN.is_file():
+        authority_plan = MAKE_AUTHORITY_PLAN.read_text(encoding="utf-8")
+        for evidence in (
+            "Status: Completed",
+            "`make root-test` passed 35 target/authority cases",
+            "Repository and external-directory `make check` passed",
+            "Hosted contract and build jobs passed",
+        ):
+            if evidence not in authority_plan:
+                errors.append(f"{MAKE_AUTHORITY_PLAN.relative_to(ROOT)} must record verification evidence: {evidence}")
     if "for project in */*.xcodeproj" in makefile:
         errors.append("Makefile must not build samples that require absent legacy SDK frameworks")
 

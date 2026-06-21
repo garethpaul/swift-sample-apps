@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-21
+
+- Isolated verification from caller-selected roots, shells, bypassing Make
+  modes, preload metadata, and additional Makefiles while preserving trusted
+  Python, Swift, and Xcode tool overrides.
+
 ## 2026-06-19
 
 - Replaced the legacy placeholder XCTest target with native tests for stable
