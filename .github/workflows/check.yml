@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run portable verification
-        run: make check
+        run: /usr/bin/make check
 
   build:
     runs-on: macos-15
@@ -41,8 +41,8 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
       - name: Run background selection behavior tests
-        run: make test
+        run: /usr/bin/make test
       - name: Run native background switcher tests
-        run: make native-test
+        run: /usr/bin/make native-test
       - name: Build background switcher canary
-        run: make build
+        run: /usr/bin/make build
