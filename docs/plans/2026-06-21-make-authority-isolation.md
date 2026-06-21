@@ -26,7 +26,8 @@ break or replace verification before checked-in targets completed.
   case, one raw tool Make-syntax rejection, two `MAKEFILE_LIST` rejections, two
   contained startup-boundary cases, and ten mode-flag rejections.
 - Repository and external-directory `make check` passed on the portable host.
-- Exact-head hosted contract and build jobs remain required before merge.
+- Hosted contract and build jobs passed on the implementation head; final
+  exact-head jobs remain required after this evidence-only update.
 
 ## Trust Boundary
 

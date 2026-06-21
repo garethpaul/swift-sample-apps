@@ -276,7 +276,7 @@ def hygiene_checks():
             "Status: Completed",
             "`make root-test` passed 35 target/authority cases",
             "Repository and external-directory `make check` passed",
-            "hosted contract and build jobs remain required",
+            "Hosted contract and build jobs passed",
         ):
             if evidence not in authority_plan:
                 errors.append(f"{MAKE_AUTHORITY_PLAN.relative_to(ROOT)} must record verification evidence: {evidence}")
