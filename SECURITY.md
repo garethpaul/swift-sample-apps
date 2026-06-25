@@ -75,3 +75,6 @@ Good-faith research is welcome when it stays within these boundaries:
 ## Maintainer Response
 
 The maintainer will review complete reports as availability allows, prioritize issues by exploitability and impact, and coordinate a fix or mitigation when the affected code is still maintained. For sample, archived, or educational repositories, the likely remediation may be documentation, dependency updates, or clearly marking unsupported code rather than a production-style patch release.
+
+The basic note archive keeps editor delegation class-bound and weak, and the
+note list does not store pushed editors after navigation ownership transfers.

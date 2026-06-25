@@ -24,6 +24,8 @@ BACKGROUND_SELECTION_TEST_PLAN = DOCS_PLANS / "2026-06-16-background-selection-s
 BACKGROUND_TEST_EXECUTION_PLAN = DOCS_PLANS / "2026-06-19-background-test-execution-contract.md"
 MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 SAMPLE_INDEX_PLAN = DOCS_PLANS / "2026-06-25-sample-service-index.md"
+NOTE_EDITOR_OWNERSHIP_PLAN = DOCS_PLANS / "2026-06-25-note-editor-ownership.md"
+NOTE_EDITOR_OWNERSHIP_RUNNER = ROOT / "scripts" / "test-note-editor-ownership.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -96,6 +98,7 @@ LOCAL_XCODE_PATH_RE = re.compile(r"(/Users/|/home/|path = (?:\.\./)+(?:Desktop|D
 FACEBOOK_LOGIN_CONTROLLER = "facebook-login/facebook-login/ViewController.swift"
 PARSE_APP_DELEGATE = "parse_example/parse_example/AppDelegate.swift"
 NOTE_LIST_CONTROLLER = "basic-note-taker/basic-note-taker/NoteListViewController.swift"
+NOTE_EDITOR_CONTROLLER = "basic-note-taker/basic-note-taker/NoteEditorViewController.swift"
 TODO_LIST_CONTROLLER = "todo-list/todo-list/FirstViewController.swift"
 TODO_TASK_MANAGER = "todo-list/todo-list/TaskManager.swift"
 SWIFT_OBJECTS_CONTROLLER = "swift-objects-example/swift-objects-example/ViewController.swift"
@@ -162,6 +165,16 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-21-make-authority-isolation.md is missing")
     if not SAMPLE_INDEX_PLAN.exists():
         errors.append("docs/plans/2026-06-25-sample-service-index.md is missing")
+    if not NOTE_EDITOR_OWNERSHIP_PLAN.exists():
+        errors.append("docs/plans/2026-06-25-note-editor-ownership.md is missing")
+    if not NOTE_EDITOR_OWNERSHIP_RUNNER.exists():
+        errors.append("scripts/test-note-editor-ownership.py is missing")
+    else:
+        note_runner = NOTE_EDITOR_OWNERSHIP_RUNNER.read_text(encoding="utf-8")
+        if "[sys.executable, str(CHECKER), \"--mode\", \"samples\"]" not in note_runner:
+            errors.append("note editor mutation runner must reuse its configured Python interpreter")
+        if '["python3", str(CHECKER)' in note_runner:
+            errors.append("note editor mutation runner must not hard-code python3")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sample_index_contracts = (
@@ -177,6 +190,15 @@ def hygiene_checks():
     for contract in sample_index_contracts:
         if contract not in readme:
             errors.append(f"README sample index is missing: {contract}")
+    documentation_contracts = {
+        "README.md": "basic note sample keeps editor delegation weak",
+        "SECURITY.md": "basic note archive keeps editor delegation class-bound and weak",
+        "VISION.md": "Keep basic note editor delegation weak",
+        "CHANGES.md": "cycle: note editor ownership",
+    }
+    for relative_path, contract in documentation_contracts.items():
+        if contract not in (ROOT / relative_path).read_text(encoding="utf-8"):
+            errors.append(f"{relative_path} must preserve note editor ownership guidance")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -250,6 +272,7 @@ def hygiene_checks():
         "check: verify",
         '"$$ROOT/scripts/check-swift-samples.py" --mode hygiene',
         '"$$ROOT/scripts/check-swift-samples.py" --mode samples',
+        '"$$ROOT/scripts/test-note-editor-ownership.py"',
         '"$$ROOT/scripts/test-background-selection.sh"',
         '"$$ROOT/scripts/test-makefile-root.sh"',
         'swiftc unavailable; skipping background selection Swift tests',
@@ -486,6 +509,25 @@ def samples_checks():
             errors.append(f"basic note cells must not assign an unchecked note lookup in {path}")
         if path == NOTE_LIST_CONTROLLER and "sselectedNote >= 0 && sselectedNote < notes.count" not in text:
             errors.append(f"basic note editor updates must guard selectedNote before writing notes in {path}")
+        if path == NOTE_LIST_CONTROLLER and "var editor: NoteEditorViewController?" in text:
+            errors.append(f"basic note list must not retain the pushed editor in {path}")
+        if path == NOTE_LIST_CONTROLLER:
+            selection_flow = (
+                "selectedNote = indexPath.row",
+                "let editor = NoteEditorViewController(note: selectedNoteText)",
+                "editor.delegate = self",
+                "navigationController.pushViewController(editor, animated: true)",
+            )
+            if any(fragment not in text for fragment in selection_flow):
+                errors.append(f"basic note selection ownership flow is incomplete in {path}")
+            elif [text.index(fragment) for fragment in selection_flow] != sorted(
+                text.index(fragment) for fragment in selection_flow
+            ):
+                errors.append(f"basic note selection must publish index before delegate assignment and navigation in {path}")
+        if path == NOTE_EDITOR_CONTROLLER and "protocol NoteEditorViewControllerDelegate: class" not in text:
+            errors.append(f"basic note editor delegate protocol must remain class-bound in {path}")
+        if path == NOTE_EDITOR_CONTROLLER and "weak var delegate: NoteEditorViewControllerDelegate?" not in text:
+            errors.append(f"basic note editor delegate must remain weak in {path}")
         if path == TODO_TASK_MANAGER and "func taskAtIndex(index: Int) -> task?" not in text:
             errors.append(f"todo task lookup must return nil for stale indexes in {path}")
         if path == TODO_TASK_MANAGER and "func removeTaskAtIndex(index: Int) -> Bool" not in text:

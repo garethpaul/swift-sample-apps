@@ -23,6 +23,8 @@ Priority:
 - Avoid main-thread remote image downloads in archive samples
 - Keep web-view demos local unless a sample documents its network setup
 - Avoid ad hoc Swift debug prints in archive samples
+- Keep basic note editor delegation weak and navigation-owned rather than
+  retaining popped editors from the root list
 - Preserve delegate-supplied SDK errors instead of shadowing or force-unwrapping
   them
 - Treat Facebook profile payloads as optional and ignore cancelled logins

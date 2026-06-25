@@ -44,6 +44,9 @@ Additional scan context:
 | `swift-objects-example` | UIKit control catalog with local-only web-view content. | None. | Static archive checks only; its historical Swift/Xcode toolchain is not pinned. |
 | `todo-list` | In-memory task entry, display, and deletion sample. | None. | Static archive checks only; its historical Swift/Xcode toolchain is not pinned. |
 
+The basic note sample keeps editor delegation weak and creates editors only for
+the active selection flow, so the root note list does not retain popped editors.
+
 Only `background_switcher` is maintained as a current build and native-test
 canary. The remaining projects are preserved as legacy source examples and
 must not be treated as production-ready or currently buildable without their

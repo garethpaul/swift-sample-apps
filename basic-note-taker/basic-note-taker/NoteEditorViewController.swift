@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol NoteEditorViewControllerDelegate {
+protocol NoteEditorViewControllerDelegate: class {
     func noteEditorDidUpdateNote(editor: NoteEditorViewController)
 }
 
@@ -28,8 +28,7 @@ class NoteEditorViewController: UIViewController, UITextViewDelegate {
     }
     }
     
-    // This should be weak, but it doesn’t like it if I make it weak.
-    var delegate: NoteEditorViewControllerDelegate?
+    weak var delegate: NoteEditorViewControllerDelegate?
     
     init(note: String = "") {
         self.note = note
