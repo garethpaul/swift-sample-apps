@@ -33,6 +33,22 @@ Additional scan context:
 - Entry points or build surfaces: none detected
 - Test-looking files: background_switcher/background_switcherTests/Info.plist, background_switcher/background_switcherTests/background_switcherTests.swift, basic-note-taker/basic-note-takerTests/Info.plist, basic-note-taker/basic-note-takerTests/basic_note_takerTests.swift, facebook-login/facebook-loginTests/Info.plist, facebook-login/facebook-loginTests/facebook_loginTests.swift, parse_example/parse_exampleTests/Info.plist, parse_example/parse_exampleTests/parse_exampleTests.swift, and 4 more
 
+## Sample Index
+
+| Sample | Purpose | Required services or SDKs | Current verification |
+| --- | --- | --- | --- |
+| `background_switcher` | Responsive, accessible background selection with current Swift behavior tests. | None. | Portable source checks, standalone Swift tests, native XCTest, and a current Xcode build canary. |
+| `basic-note-taker` | In-memory note list and editor using legacy table-view patterns. | None. | Static archive checks only; its historical Swift/Xcode toolchain is not pinned. |
+| `facebook-login` | Legacy Facebook login and optional profile display flow. | Legacy Facebook iOS SDK plus developer-local app configuration; never commit app credentials. | Static archive checks only because the SDK is not checked in. |
+| `parse_example` | Legacy Parse object-save callback example. | Legacy Parse iOS SDK plus developer-local application ID and client key; checked-in values are placeholders. | Static archive checks only because the SDK is not checked in. |
+| `swift-objects-example` | UIKit control catalog with local-only web-view content. | None. | Static archive checks only; its historical Swift/Xcode toolchain is not pinned. |
+| `todo-list` | In-memory task entry, display, and deletion sample. | None. | Static archive checks only; its historical Swift/Xcode toolchain is not pinned. |
+
+Only `background_switcher` is maintained as a current build and native-test
+canary. The remaining projects are preserved as legacy source examples and
+must not be treated as production-ready or currently buildable without their
+historical toolchains.
+
 ## Getting Started
 
 ### Prerequisites
@@ -53,6 +69,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Running or Using the Project
 
 - Open the Xcode project or workspace in Xcode and run the matching app/sample scheme.
+- Consult the sample index before opening a project; Facebook and Parse require
+  legacy SDKs and developer-local configuration that are intentionally absent.
 
 ## Testing and Verification
 
