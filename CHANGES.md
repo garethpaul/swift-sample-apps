@@ -1,5 +1,49 @@
 # Changes
 
+## 2026-06-25T21:42:44Z — P1 correctness — cycle: note editor ownership
+
+### Summary
+Removed the basic note sample's list/editor retain cycle and indefinite
+last-editor retention without changing note editing behavior.
+
+### Work completed
+- Made the editor delegate protocol class-bound and its delegate reference weak.
+- Replaced the list controller's stored editor with a selection-local editor.
+- Published the selected note index before delegation and navigation.
+- Added exact static contracts and four hostile ownership mutations.
+
+### Threads
+- Started: basic note editor lifetime ownership.
+- Continued: stale-index guards and archive/static-only verification boundaries.
+- Stopped: none.
+
+### Files changed
+- Basic note list/editor controllers, Make and checker wiring, mutation runner,
+  documentation, and `docs/plans/2026-06-25-note-editor-ownership.md`.
+
+### Validation
+- RED: sample checks rejected strong delegation and stored-editor ownership.
+- GREEN: `/usr/bin/make check` passes hygiene, samples, four ownership
+  mutations, and 35 Make authority cases.
+- `swiftc` and Xcode skip truthfully on this host; the historical note sample
+  remains static-only because its original toolchain is not pinned.
+- Codex review found the mutation runner bypassed the configured `PYTHON`
+  interpreter; it now reuses `sys.executable`, with a static regression guard.
+
+### Bugs / findings
+- P1: the editor strongly retained its list delegate while the list stored the
+  editor, forming a cycle during editing.
+- P2: the root list retained the last pushed editor indefinitely even after pop.
+- P2 review: the first mutation runner hard-coded `python3`, weakening the
+  Makefile's documented trusted-interpreter override.
+
+### Blockers
+- The basic note sample uses historical Swift/UIKit syntax and has no pinned
+  compatible build environment; behavioral claims remain source-level only.
+
+### Next action
+- Require exact-head Codex review and hosted portable/canary/CodeQL checks.
+
 ## 2026-06-25 11:46 PDT - P2 - Index sample purpose and service boundaries
 
 ### Summary

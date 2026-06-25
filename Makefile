@@ -62,6 +62,7 @@ lint:
 
 test:
 	"$$PYTHON" "$$ROOT/scripts/check-swift-samples.py" --mode samples
+	"$$PYTHON" "$$ROOT/scripts/test-note-editor-ownership.py"
 	@if command -v "$$SWIFTC" >/dev/null 2>&1; then \
 		SWIFTC="$$SWIFTC" "$$ROOT/scripts/test-background-selection.sh"; \
 	else \

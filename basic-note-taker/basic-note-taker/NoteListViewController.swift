@@ -16,15 +16,6 @@ class NoteListViewController: UITableViewController, NoteEditorViewControllerDel
     return NSStringFromClass(cellClass)
     }
     
-    var editor: NoteEditorViewController? {
-    didSet {
-        if let eeditor: NoteEditorViewController = editor {
-            navigationController.pushViewController(eeditor, animated: true)
-            eeditor.delegate = self
-        }
-    }
-    }
-    
     var notes: String[]
     var selectedNote: Int?
     
@@ -41,8 +32,10 @@ class NoteListViewController: UITableViewController, NoteEditorViewControllerDel
     
     override func tableView(tableView: UITableView!, didSelectRowAtIndexPath indexPath: NSIndexPath!) {
         if let selectedNoteText = note(indexPath) {
-            editor = NoteEditorViewController(note: selectedNoteText)
             selectedNote = indexPath.row
+            let editor = NoteEditorViewController(note: selectedNoteText)
+            editor.delegate = self
+            navigationController.pushViewController(editor, animated: true)
         }
     }
     
