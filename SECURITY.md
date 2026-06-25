@@ -28,6 +28,9 @@ Helpful reports include:
 ## Project Security Posture
 
 - This repository appears to be an Apple platform application or Swift sample. The active security scope is the code and documentation on the default branch.
+- The README sample index identifies which examples require legacy Facebook or
+  Parse SDKs and developer-local service configuration. Keep all real app IDs,
+  client keys, tokens, and user data outside the repository.
 - Review found authentication, token, or session-related code paths; changes in those areas should receive security-focused review before merge.
 - Review found external API integrations or credential-adjacent configuration; changes in those areas should receive security-focused review before merge.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.

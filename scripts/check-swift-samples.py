@@ -23,6 +23,7 @@ BACKGROUND_REDUCE_MOTION_PLAN = DOCS_PLANS / "2026-06-14-background-reduce-motio
 BACKGROUND_SELECTION_TEST_PLAN = DOCS_PLANS / "2026-06-16-background-selection-swift-tests.md"
 BACKGROUND_TEST_EXECUTION_PLAN = DOCS_PLANS / "2026-06-19-background-test-execution-contract.md"
 MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
+SAMPLE_INDEX_PLAN = DOCS_PLANS / "2026-06-25-sample-service-index.md"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -159,6 +160,23 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-19-background-test-execution-contract.md is missing")
     if not MAKE_AUTHORITY_PLAN.exists():
         errors.append("docs/plans/2026-06-21-make-authority-isolation.md is missing")
+    if not SAMPLE_INDEX_PLAN.exists():
+        errors.append("docs/plans/2026-06-25-sample-service-index.md is missing")
+
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    sample_index_contracts = (
+        "## Sample Index",
+        "| `background_switcher` | Responsive, accessible background selection with current Swift behavior tests. | None. | Portable source checks, standalone Swift tests, native XCTest, and a current Xcode build canary. |",
+        "| `basic-note-taker` | In-memory note list and editor using legacy table-view patterns. | None. | Static archive checks only; its historical Swift/Xcode toolchain is not pinned. |",
+        "| `facebook-login` | Legacy Facebook login and optional profile display flow. | Legacy Facebook iOS SDK plus developer-local app configuration; never commit app credentials. | Static archive checks only because the SDK is not checked in. |",
+        "| `parse_example` | Legacy Parse object-save callback example. | Legacy Parse iOS SDK plus developer-local application ID and client key; checked-in values are placeholders. | Static archive checks only because the SDK is not checked in. |",
+        "| `swift-objects-example` | UIKit control catalog with local-only web-view content. | None. | Static archive checks only; its historical Swift/Xcode toolchain is not pinned. |",
+        "| `todo-list` | In-memory task entry, display, and deletion sample. | None. | Static archive checks only; its historical Swift/Xcode toolchain is not pinned. |",
+        "Only `background_switcher` is maintained as a current build",
+    )
+    for contract in sample_index_contracts:
+        if contract not in readme:
+            errors.append(f"README sample index is missing: {contract}")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:

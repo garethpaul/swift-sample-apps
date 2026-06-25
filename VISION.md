@@ -47,7 +47,6 @@ Priority:
 
 Next priorities:
 
-- Add a README table with each sample, purpose, and required services
 - Document Xcode and iOS version assumptions per app
 - Add setup notes for Facebook and Parse examples without secrets
 - Add sample-specific notes for legacy table/data-source assumptions

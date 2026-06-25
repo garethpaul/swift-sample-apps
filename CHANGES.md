@@ -1,5 +1,71 @@
 # Changes
 
+## 2026-06-25 11:46 PDT - P2 - Index sample purpose and service boundaries
+
+### Summary
+
+Added the roadmap-promised README table for every checked-in sample, including
+its purpose, required external services or SDKs, and current verification
+boundary. The index separates the maintained background-switcher canary from
+legacy static-only examples.
+
+### Work completed
+
+- Added one row for each of the six sample directories.
+- Marked Facebook and Parse dependencies as legacy, developer-local, and
+  credential-free in source control.
+- Added static contracts for table completeness, service wording, completed
+  plan evidence, and roadmap synchronization.
+
+### Threads
+
+- Started: none; this focused documentation gap was completed directly.
+- Continued: none.
+- Stopped: none.
+
+### Files changed
+
+- `README.md` — added the sample purpose, service, and verification table.
+- `SECURITY.md` — tied service configuration back to credential hygiene.
+- `VISION.md` — removed the completed sample-index priority.
+- `scripts/check-swift-samples.py` — enforced all rows and service boundaries.
+- `docs/plans/2026-06-25-sample-service-index.md` — recorded scope and evidence.
+
+### Validation
+
+- Red-first hygiene check — rejected the missing plan, heading, six sample
+  rows, and Facebook/Parse service descriptions as expected.
+- Initial synchronized documentation patch — partially applied the README then
+  stopped on a mismatched generated security sentence; remaining files were
+  applied with the repository's exact wording.
+- Diff review — found the first contract proved row names but not purpose
+  cells; tightened it to exact six-row semantics and rejected a mutated note
+  purpose for the intended missing-row error.
+- `python3 -m py_compile scripts/check-swift-samples.py` — passed.
+- Root and external-directory `/usr/bin/make check` — both passed 35 Make
+  authority cases plus hygiene and sample contracts; `swiftc` and `xcodebuild`
+  skipped truthfully because they are unavailable on this Linux host.
+- `git diff --check` — passed.
+- Initial suspicious-addition scan used unsupported ripgrep lookahead syntax;
+  the corrected PCRE2 scan passed without credential-like additions.
+- Xcode/native runtime — available only through the documented macOS hosted
+  jobs; local Linux validation remains portable/static.
+
+### Bugs / findings
+
+- P2: readers had no single source explaining each sample's purpose, service
+  dependency, or whether it was actively build-tested versus static-only.
+
+### Blockers
+
+- Legacy Facebook and Parse SDKs are intentionally absent; those projects
+  cannot be runtime-validated without historical dependencies and local setup.
+
+### Next action
+
+- Open the focused pull request, run exact-head Codex review, and confirm the
+  hosted portable, Swift, native XCTest, and Xcode build jobs before merge.
+
 ## 2026-06-21
 
 - Isolated verification from caller-selected roots, shells, bypassing Make
