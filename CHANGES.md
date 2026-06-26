@@ -1,5 +1,51 @@
 # Changes
 
+## 2026-06-26T20:28:05Z — P1 correctness — cycle: swift objects missing image
+
+### Summary
+Prevented the archived UIKit catalog from dereferencing a missing bundled image
+when the `UIImageView` row is selected.
+
+### Work completed
+- Optional-bound `swift-hero.png` before reading its dimensions or constructing
+  the image view; the archive intentionally leaves the detail empty when the
+  optional asset is unavailable.
+- Added an exact source contract, two hostile mutations, Make wiring,
+  synchronized maintenance guidance, and a completed plan.
+
+### Threads
+- Started: swift objects optional image ownership.
+- Continued: legacy static-only verification boundaries.
+- Stopped: none.
+
+### Validation
+- RED: the sample contract rejected the unchecked image sizing before the
+  source fix.
+- GREEN: repository and external-directory `make check` passed 35 Make
+  authority cases, four note-editor mutations, five todo-input mutations, and
+  both image-guard mutations. `swiftc` and `xcodebuild` skipped truthfully on
+  this host.
+- Python compilation, shell syntax, and `git diff --check` passed.
+- The first full gate rejected a README contract split by Markdown wrapping;
+  the contract and prose were made contiguous before both full gates passed.
+- Current-tree and added-line secret scans are clean. The history scan surfaced
+  two pre-existing generic-key false positives in old commits; neither exists
+  in the current tree, and GitHub secret scanning has no open alert.
+- Hosted and exact-head review gates remain required before merge.
+
+### Audit
+- No open public pull requests or issues remained when this cycle started.
+- Dependabot, code-scanning, and secret-scanning reported no open alerts.
+- Unmerged remote tips are older rejected bootstrap candidates or stale
+  superseded branches; none represents current unfinished product work.
+
+### Blockers
+- The swift-objects sample uses historical Swift/UIKit syntax and has no pinned
+  compatible build environment, so behavior remains source-contract verified.
+
+### Next action
+- Require exact-head Codex review and hosted portable/canary gates before merge.
+
 ## 2026-06-26T11:47:00Z — P2 correctness — cycle: todo task input
 
 ### Summary

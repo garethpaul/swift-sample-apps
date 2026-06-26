@@ -39,10 +39,11 @@ class DetailViewController : UIViewController, UIPickerViewDataSource, UIPickerV
         }
         else if self.title == "UIImageView"
         {
-            var image     = UIImage(named: "swift-hero.png")
-            var imageView = UIImageView(frame: CGRectMake((CGRectGetWidth(self.view.bounds) - image.size.width) / 2.0, 120.0, image.size.width, image.size.height))
-            imageView.image = image
-            self.view.addSubview(imageView)
+            if let image = UIImage(named: "swift-hero.png") {
+                var imageView = UIImageView(frame: CGRectMake((CGRectGetWidth(self.view.bounds) - image.size.width) / 2.0, 120.0, image.size.width, image.size.height))
+                imageView.image = image
+                self.view.addSubview(imageView)
+            }
         }
         else if self.title == "UISlider"
         {

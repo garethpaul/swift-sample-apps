@@ -33,6 +33,7 @@ Priority:
 - Guard sample table indexes before removing local rows
 - Reject blank todo names before insertion and preserve the add form on failure
 - Guard swift object table indexes before opening detail views
+- Guard optional archive images before reading dimensions
 - Keep Xcode framework and bridging-header paths repo-relative
 - Maintain the top-level index of included examples
 - Keep completed maintenance plans under `docs/plans`
