@@ -19,11 +19,12 @@ class SecondViewController: UIViewController , UITextFieldDelegate {
     }
     @IBAction func btnClickAction( sender: UIButton){
         
-        taskMngr.addTask(txtTask.text, desc: txtDesc.text)
-        self.view.endEditing(true)
-        txtTask.text = ""
-        txtDesc.text = ""
-        self.tabBarController.selectedIndex = 0
+        if taskMngr.addTask(txtTask.text, desc: txtDesc.text) {
+            self.view.endEditing(true)
+            txtTask.text = ""
+            txtDesc.text = ""
+            self.tabBarController.selectedIndex = 0
+        }
         
     }
     

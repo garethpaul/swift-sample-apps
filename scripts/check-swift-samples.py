@@ -25,7 +25,9 @@ BACKGROUND_TEST_EXECUTION_PLAN = DOCS_PLANS / "2026-06-19-background-test-execut
 MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 SAMPLE_INDEX_PLAN = DOCS_PLANS / "2026-06-25-sample-service-index.md"
 NOTE_EDITOR_OWNERSHIP_PLAN = DOCS_PLANS / "2026-06-25-note-editor-ownership.md"
+TODO_INPUT_PLAN = DOCS_PLANS / "2026-06-26-todo-task-input.md"
 NOTE_EDITOR_OWNERSHIP_RUNNER = ROOT / "scripts" / "test-note-editor-ownership.py"
+TODO_INPUT_RUNNER = ROOT / "scripts" / "test-todo-task-input.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -101,6 +103,7 @@ NOTE_LIST_CONTROLLER = "basic-note-taker/basic-note-taker/NoteListViewController
 NOTE_EDITOR_CONTROLLER = "basic-note-taker/basic-note-taker/NoteEditorViewController.swift"
 TODO_LIST_CONTROLLER = "todo-list/todo-list/FirstViewController.swift"
 TODO_TASK_MANAGER = "todo-list/todo-list/TaskManager.swift"
+TODO_ADD_CONTROLLER = "todo-list/todo-list/SecondViewController.swift"
 SWIFT_OBJECTS_CONTROLLER = "swift-objects-example/swift-objects-example/ViewController.swift"
 BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewController.swift"
 BACKGROUND_SELECTION_SOURCE = ROOT / "background_switcher/background_switcher/BackgroundSelection.swift"
@@ -167,6 +170,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-25-sample-service-index.md is missing")
     if not NOTE_EDITOR_OWNERSHIP_PLAN.exists():
         errors.append("docs/plans/2026-06-25-note-editor-ownership.md is missing")
+    if not TODO_INPUT_PLAN.exists():
+        errors.append("docs/plans/2026-06-26-todo-task-input.md is missing")
     if not NOTE_EDITOR_OWNERSHIP_RUNNER.exists():
         errors.append("scripts/test-note-editor-ownership.py is missing")
     else:
@@ -175,6 +180,14 @@ def hygiene_checks():
             errors.append("note editor mutation runner must reuse its configured Python interpreter")
         if '["python3", str(CHECKER)' in note_runner:
             errors.append("note editor mutation runner must not hard-code python3")
+    if not TODO_INPUT_RUNNER.exists():
+        errors.append("scripts/test-todo-task-input.py is missing")
+    else:
+        todo_runner = TODO_INPUT_RUNNER.read_text(encoding="utf-8")
+        if "[sys.executable, str(CHECKER), \"--mode\", \"samples\"]" not in todo_runner:
+            errors.append("todo input mutation runner must reuse its configured Python interpreter")
+        if '["python3", str(CHECKER)' in todo_runner:
+            errors.append("todo input mutation runner must not hard-code python3")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sample_index_contracts = (
@@ -199,6 +212,14 @@ def hygiene_checks():
     for relative_path, contract in documentation_contracts.items():
         if contract not in (ROOT / relative_path).read_text(encoding="utf-8"):
             errors.append(f"{relative_path} must preserve note editor ownership guidance")
+    todo_documentation = {
+        "README.md": "Todo insertion rejects empty",
+        "VISION.md": "Reject blank todo names before insertion",
+        "CHANGES.md": "cycle: todo task input",
+    }
+    for relative_path, contract in todo_documentation.items():
+        if contract not in (ROOT / relative_path).read_text(encoding="utf-8"):
+            errors.append(f"{relative_path} must preserve todo task-input guidance")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -273,6 +294,7 @@ def hygiene_checks():
         '"$$ROOT/scripts/check-swift-samples.py" --mode hygiene',
         '"$$ROOT/scripts/check-swift-samples.py" --mode samples',
         '"$$ROOT/scripts/test-note-editor-ownership.py"',
+        '"$$ROOT/scripts/test-todo-task-input.py"',
         '"$$ROOT/scripts/test-background-selection.sh"',
         '"$$ROOT/scripts/test-makefile-root.sh"',
         'swiftc unavailable; skipping background selection Swift tests',
@@ -532,6 +554,34 @@ def samples_checks():
             errors.append(f"todo task lookup must return nil for stale indexes in {path}")
         if path == TODO_TASK_MANAGER and "func removeTaskAtIndex(index: Int) -> Bool" not in text:
             errors.append(f"todo task removal must report whether an index was removed in {path}")
+        if path == TODO_TASK_MANAGER:
+            add_contracts = (
+                "func addTask(name: String , desc:String) -> Bool",
+                "name.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet()).isEmpty",
+                "return false",
+                "tasks.append(task(name: name, desc: desc))",
+                "return true",
+            )
+            if any(contract not in text for contract in add_contracts):
+                errors.append(f"todo task insertion must reject blank names and report acceptance in {path}")
+            elif [text.index(contract) for contract in add_contracts] != sorted(
+                text.index(contract) for contract in add_contracts
+            ):
+                errors.append(f"todo task insertion must reject blank names before appending in {path}")
+        if path == TODO_ADD_CONTROLLER:
+            accepted_flow = (
+                "if taskMngr.addTask(txtTask.text, desc: txtDesc.text) {",
+                "self.view.endEditing(true)",
+                'txtTask.text = ""',
+                'txtDesc.text = ""',
+                "self.tabBarController.selectedIndex = 0",
+            )
+            if any(contract not in text for contract in accepted_flow):
+                errors.append(f"todo add UI must clear and navigate only after accepted insertion in {path}")
+            elif [text.index(contract) for contract in accepted_flow] != sorted(
+                text.index(contract) for contract in accepted_flow
+            ):
+                errors.append(f"todo add UI acceptance flow is out of order in {path}")
         if path == TODO_TASK_MANAGER and "index < 0 || index >= tasks.count" not in text:
             errors.append(f"todo task manager must guard indexes before reading or removing tasks in {path}")
         if path == TODO_LIST_CONTROLLER and "taskMngr.tasks.removeAtIndex(indexPath.row)" in text:

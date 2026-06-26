@@ -87,7 +87,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   also require the Parse sample save callback to inspect errors before
   reporting completion, the basic note sample to guard stale table indexes
   before reading or writing notes, and the todo-list sample to guard stale
-  table indexes before reading or removing tasks. The swift-objects sample also
+  table indexes before reading or removing tasks. Todo insertion rejects empty
+  and whitespace-only names, and its add screen clears or navigates only after
+  the manager accepts a task. The swift-objects sample also
   guards stale table indexes before reading item titles. Xcode project
   checks reject developer-local framework and bridging-header paths. When
   `xcodebuild` is installed, the `build` target compiles the self-contained
@@ -167,6 +169,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   index guard.
 - See `docs/plans/2026-06-09-todo-index-guard.md` for the todo-list table
   index guard.
+- See `docs/plans/2026-06-26-todo-task-input.md` for the todo-list blank-name
+  rejection and accepted-insertion UI boundary.
 - See `docs/plans/2026-06-09-swift-objects-index-guard.md` for the
   swift-objects table index guard.
 - See `docs/plans/2026-06-10-facebook-payload-and-ci.md` for Facebook payload

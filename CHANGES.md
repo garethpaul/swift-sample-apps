@@ -1,5 +1,41 @@
 # Changes
 
+## 2026-06-26T11:47:00Z — P2 correctness — cycle: todo task input
+
+### Summary
+Prevented the archived todo sample from adding invisible blank-name rows or
+discarding the add form after a rejected submission.
+
+### Work completed
+- Made `TaskManager.addTask` reject empty and whitespace-only names and return
+  an acceptance result without rewriting valid task text.
+- Gated keyboard dismissal, field clearing, and tab navigation on successful
+  insertion.
+- Added exact sample contracts, five hostile mutations, Make wiring,
+  synchronized documentation, and a completed plan.
+
+### Threads
+- Started: todo task-input ownership.
+- Continued: legacy static-only verification boundaries.
+- Stopped: none.
+
+### Validation
+- RED: sample checks rejected the missing manager acceptance and guarded UI
+  flow before implementation.
+- GREEN: repository and external-directory `make check` pass hygiene and sample
+  contracts, four note-editor mutations, five todo-input mutations, and 35 Make
+  authority cases. Python compilation, shell syntax, and `git diff --check`
+  also pass.
+- Hosted checks remain exact-head merge gates; this host has no `swiftc` or
+  `xcodebuild`, so native background canary tests/build skip truthfully.
+
+### Blockers
+- The todo sample uses historical Swift/UIKit syntax and has no pinned
+  compatible build environment, so behavior remains source-contract verified.
+
+### Next action
+- Require exact-head Codex review and hosted portable/canary gates before merge.
+
 ## 2026-06-25T21:42:44Z — P1 correctness — cycle: note editor ownership
 
 ### Summary
