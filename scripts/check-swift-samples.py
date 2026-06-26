@@ -26,8 +26,10 @@ MAKE_AUTHORITY_PLAN = DOCS_PLANS / "2026-06-21-make-authority-isolation.md"
 SAMPLE_INDEX_PLAN = DOCS_PLANS / "2026-06-25-sample-service-index.md"
 NOTE_EDITOR_OWNERSHIP_PLAN = DOCS_PLANS / "2026-06-25-note-editor-ownership.md"
 TODO_INPUT_PLAN = DOCS_PLANS / "2026-06-26-todo-task-input.md"
+SWIFT_OBJECTS_IMAGE_PLAN = DOCS_PLANS / "2026-06-26-swift-objects-image-guard.md"
 NOTE_EDITOR_OWNERSHIP_RUNNER = ROOT / "scripts" / "test-note-editor-ownership.py"
 TODO_INPUT_RUNNER = ROOT / "scripts" / "test-todo-task-input.py"
+SWIFT_OBJECTS_IMAGE_RUNNER = ROOT / "scripts" / "test-swift-objects-image.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -105,6 +107,7 @@ TODO_LIST_CONTROLLER = "todo-list/todo-list/FirstViewController.swift"
 TODO_TASK_MANAGER = "todo-list/todo-list/TaskManager.swift"
 TODO_ADD_CONTROLLER = "todo-list/todo-list/SecondViewController.swift"
 SWIFT_OBJECTS_CONTROLLER = "swift-objects-example/swift-objects-example/ViewController.swift"
+SWIFT_OBJECTS_DETAIL_CONTROLLER = "swift-objects-example/swift-objects-example/DetailViewController.swift"
 BACKGROUND_SWITCHER_CONTROLLER = "background_switcher/background_switcher/ViewController.swift"
 BACKGROUND_SELECTION_SOURCE = ROOT / "background_switcher/background_switcher/BackgroundSelection.swift"
 BACKGROUND_SELECTION_TEST = ROOT / "Tests/BackgroundSelectionTests/main.swift"
@@ -172,6 +175,8 @@ def hygiene_checks():
         errors.append("docs/plans/2026-06-25-note-editor-ownership.md is missing")
     if not TODO_INPUT_PLAN.exists():
         errors.append("docs/plans/2026-06-26-todo-task-input.md is missing")
+    if not SWIFT_OBJECTS_IMAGE_PLAN.exists():
+        errors.append("docs/plans/2026-06-26-swift-objects-image-guard.md is missing")
     if not NOTE_EDITOR_OWNERSHIP_RUNNER.exists():
         errors.append("scripts/test-note-editor-ownership.py is missing")
     else:
@@ -188,6 +193,14 @@ def hygiene_checks():
             errors.append("todo input mutation runner must reuse its configured Python interpreter")
         if '["python3", str(CHECKER)' in todo_runner:
             errors.append("todo input mutation runner must not hard-code python3")
+    if not SWIFT_OBJECTS_IMAGE_RUNNER.exists():
+        errors.append("scripts/test-swift-objects-image.py is missing")
+    else:
+        image_runner = SWIFT_OBJECTS_IMAGE_RUNNER.read_text(encoding="utf-8")
+        if "[sys.executable, str(CHECKER), \"--mode\", \"samples\"]" not in image_runner:
+            errors.append("swift objects image mutation runner must reuse its configured Python interpreter")
+        if '["python3", str(CHECKER)' in image_runner:
+            errors.append("swift objects image mutation runner must not hard-code python3")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sample_index_contracts = (
@@ -220,6 +233,14 @@ def hygiene_checks():
     for relative_path, contract in todo_documentation.items():
         if contract not in (ROOT / relative_path).read_text(encoding="utf-8"):
             errors.append(f"{relative_path} must preserve todo task-input guidance")
+    image_documentation = {
+        "README.md": "absent archive image before reading dimensions",
+        "VISION.md": "Guard optional archive images before reading dimensions",
+        "CHANGES.md": "cycle: swift objects missing image",
+    }
+    for relative_path, contract in image_documentation.items():
+        if contract not in (ROOT / relative_path).read_text(encoding="utf-8"):
+            errors.append(f"{relative_path} must preserve the swift objects image guard")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -606,6 +627,16 @@ def samples_checks():
             errors.append(f"swift objects cells must optional-bind guarded item lookup in {path}")
         if path == SWIFT_OBJECTS_CONTROLLER and "if let selectedItemTitle = item(indexPath)" not in text:
             errors.append(f"swift objects selection must optional-bind guarded item lookup in {path}")
+        if path == SWIFT_OBJECTS_DETAIL_CONTROLLER:
+            guarded_image = (
+                'if let image = UIImage(named: "swift-hero.png") {\n'
+                '                var imageView = UIImageView(frame: CGRectMake((CGRectGetWidth(self.view.bounds) - image.size.width) / 2.0, 120.0, image.size.width, image.size.height))\n'
+                '                imageView.image = image\n'
+                '                self.view.addSubview(imageView)\n'
+                '            }'
+            )
+            if guarded_image not in text:
+                errors.append(f"swift objects image detail must size only an optional-bound bundled image in {path}")
         if path == BACKGROUND_SWITCHER_CONTROLLER:
             if "UIView.animate(withDuration: 0.4" in text or "self.imageView.alpha =" in text:
                 errors.append(f"background selection must not use delayed two-stage alpha animation in {path}")
