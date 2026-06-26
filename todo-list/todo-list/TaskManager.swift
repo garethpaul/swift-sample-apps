@@ -18,9 +18,12 @@ struct task{
 class TaskManager: NSObject {
     var tasks = task[]()
     
-    func addTask(name: String , desc:String){
-        //tasks.append(task(name: name , desc: desc))
+    func addTask(name: String , desc:String) -> Bool {
+        if name.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet()).isEmpty {
+            return false
+        }
         tasks.append(task(name: name, desc: desc))
+        return true
     }
 
     func taskAtIndex(index: Int) -> task? {
