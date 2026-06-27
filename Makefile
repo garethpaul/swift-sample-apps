@@ -65,6 +65,7 @@ test:
 	"$$PYTHON" "$$ROOT/scripts/test-note-editor-ownership.py"
 	"$$PYTHON" "$$ROOT/scripts/test-todo-task-input.py"
 	"$$PYTHON" "$$ROOT/scripts/test-swift-objects-image.py"
+	"$$PYTHON" "$$ROOT/scripts/test-service-error-privacy.py"
 	@if command -v "$$SWIFTC" >/dev/null 2>&1; then \
 		SWIFTC="$$SWIFTC" "$$ROOT/scripts/test-background-selection.sh"; \
 	else \

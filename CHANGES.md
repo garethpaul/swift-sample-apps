@@ -1,5 +1,55 @@
 # Changes
 
+## 2026-06-26T21:04:00-07:00 — P1 privacy — cycle: service error privacy
+
+### Summary
+
+Stopped the archived Facebook and Parse samples from interpolating complete
+third-party `NSError` objects into application logs.
+
+### Work completed
+
+- Replaced raw Facebook fallback-error logging with a bounded integration label.
+- Replaced raw Parse save-error logging with a bounded failure label.
+- Preserved Facebook user-facing error selection, Parse callback branching, and
+  all success behavior.
+- Added static source contracts and two hostile mutations that restore raw
+  provider-object logging.
+- Updated repository privacy, roadmap, README, and plan evidence.
+
+### Files changed
+
+- `facebook-login/facebook-login/ViewController.swift` and
+  `parse_example/parse_example/AppDelegate.swift` — privacy-safe diagnostics.
+- `scripts/check-swift-samples.py`, `scripts/test-service-error-privacy.py`, and
+  `Makefile` — executable source and mutation contracts.
+- `README.md`, `SECURITY.md`, `VISION.md`, and
+  `docs/plans/2026-06-26-service-error-privacy.md` — documented boundary.
+
+### Validation
+
+- Red-first sample contract rejected both original raw `NSError` log calls.
+- `python3 scripts/test-service-error-privacy.py` passed with both hostile raw
+  provider-error mutations rejected.
+- Root and external-directory `/usr/bin/make check` passed 35 Make authority
+  cases, four note-editor mutations, five todo-input mutations, two image-guard
+  mutations, and two service-error privacy mutations.
+- `swiftc` and `xcodebuild` were unavailable on this Linux host and skipped
+  truthfully; hosted macOS remains the native execution gate.
+- `git diff --check` passed.
+
+### Findings and blockers
+
+- Bug fixed: provider error descriptions can contain request or account metadata
+  inappropriate for an archive sample's application logs.
+- Facebook and Parse SDKs remain absent, so these legacy integrations are
+  validated statically rather than linked or executed.
+
+### Next action
+
+- Publish the reviewed head and merge only after hosted portable, Xcode, and
+  CodeQL checks pass.
+
 ## 2026-06-26T20:28:05Z — P1 correctness — cycle: swift objects missing image
 
 ### Summary

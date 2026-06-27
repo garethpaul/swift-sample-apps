@@ -102,7 +102,7 @@ class ViewController: UIViewController, FBLoginViewDelegate {
         } else {
             alertTitle  = "Something went wrong"
             alertMessage = "Please try again later."
-            NSLog("Unexpected error:%@", error)
+            NSLog("Unexpected Facebook login error")
         }
         
         let alertView: UIAlertView = UIAlertView(title: alertTitle, message: alertMessage, delegate: nil, cancelButtonTitle: "OK")

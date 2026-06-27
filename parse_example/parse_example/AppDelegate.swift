@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         obj.setObject("bar", forKey: "foo")
         obj.saveInBackgroundWithBlock({ (succeeded: Bool!, err: NSError!) -> Void in
             if err != nil {
-                NSLog("Parse save failed:%@", err)
+                NSLog("Parse save failed")
                 return
             }
             if !succeeded {
