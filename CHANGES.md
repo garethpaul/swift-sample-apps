@@ -1,5 +1,47 @@
 # Changes
 
+## 2026-07-16T05:20:00Z — P1 CI — cycle: iOS simulator destination drift
+
+### Summary
+
+`make native-test` pinned `-destination 'platform=iOS Simulator,name=iPhone 16
+Pro,OS=latest'`. GitHub's hosted `macos-15` image rotated its simulators, so
+that name no longer resolves and the `build` job fails with "Unable to find a
+device matching the provided destination specifier" without any repository
+change. Resolve an available iPhone simulator at run time instead.
+
+### Evidence
+
+- `build` on `fix/privacy-safe-service-errors-20260626` passed 2026-06-27 and
+  failed 2026-07-16 with the destination error, on a branch whose only new
+  commits touch Python contract scripts and documentation.
+- `master` last ran green 2026-07-09, so the drift landed after that and will
+  break `master` on its next run.
+- The adjacent `build` target already used `generic/platform=iOS Simulator` and
+  kept passing; only the name-pinned `test` destination broke.
+
+### Work completed
+
+- `scripts/select-ios-simulator.py` — resolve an available iPhone UDID from
+  `xcrun simctl list devices available -j`; fail closed when none exists.
+- `Makefile` — `native-test` resolves a UDID and passes
+  `-destination "id=$$simulator_udid"`; the no-xcodebuild skip path is
+  unchanged.
+- `scripts/test-select-ios-simulator.py` — drive the selector with recorded
+  simctl payloads so the behavior is verifiable on Linux, covering the exact
+  drift case (image without iPhone 16 Pro), no-available-device, and iPad-only.
+- `scripts/check-swift-samples.py` — the hygiene contract required the Makefile
+  to keep the pinned simulator name, so it blocked this fix. Pin the resolver
+  and the `id=` destination instead.
+
+### Verification
+
+- `make check` exit 0; selector contract passes 4 cases.
+- Mutation: reverting to the pinned name now fails the hygiene contract.
+- `make native-test` on Linux still skips truthfully.
+- The destination itself can only be exercised on hosted macOS; that job is the
+  gate for this change.
+
 ## 2026-06-26T20:28:05Z — P1 correctness — cycle: swift objects missing image
 
 ### Summary

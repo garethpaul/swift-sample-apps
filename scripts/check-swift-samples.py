@@ -322,7 +322,13 @@ def hygiene_checks():
         "override CANARY_PROJECT := $(ROOT)/background_switcher/background_switcher.xcodeproj",
         "native-test:",
         "-scheme background_switcher",
-        "platform=iOS Simulator,name=iPhone 16 Pro,OS=latest",
+        # Pinning a simulator *name* here is what let hosted-image drift break
+        # the build: the image stopped shipping iPhone 16 Pro and this contract
+        # required the Makefile to keep asking for it. Pin the resolver and the
+        # id= destination instead, so the canary tracks "an available iPhone
+        # simulator" and the contract cannot block its own fix.
+        '"$$ROOT/scripts/select-ios-simulator.py"',
+        '-destination "id=$$simulator_udid"',
         "test;",
         "xcodebuild unavailable; skipping native background switcher tests",
         "-target background_switcher",
