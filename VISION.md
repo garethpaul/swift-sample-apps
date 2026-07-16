@@ -27,6 +27,7 @@ Priority:
   retaining popped editors from the root list
 - Preserve delegate-supplied SDK errors instead of shadowing or force-unwrapping
   them
+- Keep raw Facebook and Parse provider errors out of logs
 - Treat Facebook profile payloads as optional and ignore cancelled logins
 - Check Parse save callback errors before reporting completion
 - Guard sample table indexes before reading or updating local arrays

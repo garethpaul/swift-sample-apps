@@ -91,8 +91,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
   and whitespace-only names, and its add screen clears or navigates only after
   the manager accepts a task. The swift-objects sample also
   guards stale table indexes before reading item titles. It optional-binds its
-  absent archive image before reading dimensions. Xcode project checks reject
-  developer-local framework and bridging-header paths. When
+  absent archive image before reading dimensions. Facebook and Parse provider error objects are not written to logs;
+  callbacks keep bounded integration diagnostics instead. Xcode project checks
+  reject developer-local framework and bridging-header paths. When
   `xcodebuild` is installed, the `build` target compiles the self-contained
   `background_switcher` canary for a generic iOS Simulator. Parse and Facebook
   samples remain static-only because their legacy SDK frameworks are absent.

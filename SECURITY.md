@@ -31,6 +31,9 @@ Helpful reports include:
 - The README sample index identifies which examples require legacy Facebook or
   Parse SDKs and developer-local service configuration. Keep all real app IDs,
   client keys, tokens, and user data outside the repository.
+- Keep raw Facebook and Parse provider error objects out of archived sample logs;
+  diagnostics should identify the failing integration without copying provider
+  metadata.
 - Review found authentication, token, or session-related code paths; changes in those areas should receive security-focused review before merge.
 - Review found external API integrations or credential-adjacent configuration; changes in those areas should receive security-focused review before merge.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.

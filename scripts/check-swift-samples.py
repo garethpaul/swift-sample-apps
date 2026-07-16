@@ -30,6 +30,7 @@ SWIFT_OBJECTS_IMAGE_PLAN = DOCS_PLANS / "2026-06-26-swift-objects-image-guard.md
 NOTE_EDITOR_OWNERSHIP_RUNNER = ROOT / "scripts" / "test-note-editor-ownership.py"
 TODO_INPUT_RUNNER = ROOT / "scripts" / "test-todo-task-input.py"
 SWIFT_OBJECTS_IMAGE_RUNNER = ROOT / "scripts" / "test-swift-objects-image.py"
+SERVICE_ERROR_PRIVACY_RUNNER = ROOT / "scripts" / "test-service-error-privacy.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 EXPECTED_WORKFLOW = """name: Check
 
@@ -99,6 +100,13 @@ SYNC_IMAGE_LOAD_RE = re.compile(r"NSData\s*\(\s*contentsOfURL")
 INSECURE_SWIFT_URL_RE = re.compile(r"NSURL\s*\(\s*string:\s*\"http://")
 SWIFT_PRINT_RE = re.compile(r"\bprint(?:ln)?\s*\(")
 LOCAL_XCODE_PATH_RE = re.compile(r"(/Users/|/home/|path = (?:\.\./)+(?:Desktop|Documents)/)")
+# Logging a whole NSError via %@ pulls in userInfo, which can carry provider
+# request URLs and response bodies. Enforce that property rather than pinning
+# exact log wording: bounded members such as error.code or error.domain are not
+# provider metadata and must stay loggable, so a later diagnostic improvement
+# does not have to edit this contract to pass it.
+RAW_NSERROR_LOG_RE = re.compile(r"NSLog\s*\(\s*\"[^\"]*%@[^\"]*\"\s*,\s*(?:error|err)\s*\)")
+RAW_NSERROR_INTERPOLATION_RE = re.compile(r"NSLog\s*\(\s*\"[^\"]*\\\((?:error|err)\)")
 FACEBOOK_LOGIN_CONTROLLER = "facebook-login/facebook-login/ViewController.swift"
 PARSE_APP_DELEGATE = "parse_example/parse_example/AppDelegate.swift"
 NOTE_LIST_CONTROLLER = "basic-note-taker/basic-note-taker/NoteListViewController.swift"
@@ -201,6 +209,14 @@ def hygiene_checks():
             errors.append("swift objects image mutation runner must reuse its configured Python interpreter")
         if '["python3", str(CHECKER)' in image_runner:
             errors.append("swift objects image mutation runner must not hard-code python3")
+    if not SERVICE_ERROR_PRIVACY_RUNNER.exists():
+        errors.append("scripts/test-service-error-privacy.py is missing")
+    else:
+        privacy_runner = SERVICE_ERROR_PRIVACY_RUNNER.read_text(encoding="utf-8")
+        if "[sys.executable, str(CHECKER), \"--mode\", \"samples\"]" not in privacy_runner:
+            errors.append("service error privacy mutation runner must reuse its configured Python interpreter")
+        if '["python3", str(CHECKER)' in privacy_runner:
+            errors.append("service error privacy mutation runner must not hard-code python3")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     sample_index_contracts = (
@@ -241,6 +257,15 @@ def hygiene_checks():
     for relative_path, contract in image_documentation.items():
         if contract not in (ROOT / relative_path).read_text(encoding="utf-8"):
             errors.append(f"{relative_path} must preserve the swift objects image guard")
+    privacy_documentation = {
+        "README.md": "provider error objects are not written to logs",
+        "SECURITY.md": "provider error objects out of archived sample logs",
+        "VISION.md": "Keep raw Facebook and Parse provider errors out of logs",
+        "CHANGES.md": "cycle: service error privacy",
+    }
+    for relative_path, contract in privacy_documentation.items():
+        if contract not in (ROOT / relative_path).read_text(encoding="utf-8"):
+            errors.append(f"{relative_path} must preserve service error privacy guidance")
 
     plans = sorted(DOCS_PLANS.glob("*.md")) if DOCS_PLANS.exists() else []
     if not plans:
@@ -521,6 +546,12 @@ def samples_checks():
             errors.append(f"Facebook login error handling must not shadow the delegate NSError in {path}")
         if path == FACEBOOK_LOGIN_CONTROLLER and "error!" in text:
             errors.append(f"Facebook login error handling must not force-unwrap NSError values in {path}")
+        if path == FACEBOOK_LOGIN_CONTROLLER and (
+            RAW_NSERROR_LOG_RE.search(text) or RAW_NSERROR_INTERPOLATION_RE.search(text)
+        ):
+            errors.append(f"Facebook login errors must not log raw provider NSError objects in {path}")
+        if path == FACEBOOK_LOGIN_CONTROLLER and 'NSLog("Unexpected Facebook login error' not in text:
+            errors.append(f"Facebook login fallback must keep a bounded diagnostic in {path}")
         if path == FACEBOOK_LOGIN_CONTROLLER:
             for contract in (
                 'profileID = userObj["id"] as? String',
@@ -534,6 +565,12 @@ def samples_checks():
                 errors.append(f"Facebook user payload fields must not be force-cast in {path}")
         if path == PARSE_APP_DELEGATE and 'NSLog("Done")' in text:
             errors.append(f"Parse save callback must not log success before checking errors in {path}")
+        if path == PARSE_APP_DELEGATE and (
+            RAW_NSERROR_LOG_RE.search(text) or RAW_NSERROR_INTERPOLATION_RE.search(text)
+        ):
+            errors.append(f"Parse save failures must not log raw provider NSError objects in {path}")
+        if path == PARSE_APP_DELEGATE and 'NSLog("Parse save failed' not in text:
+            errors.append(f"Parse save failure must keep a bounded diagnostic in {path}")
         if path == PARSE_APP_DELEGATE and "if err != nil" not in text:
             errors.append(f"Parse save callback must check the NSError before reporting completion in {path}")
         if path == PARSE_APP_DELEGATE and "Parse save failed" not in text:
