@@ -65,6 +65,7 @@ test:
 	"$$PYTHON" "$$ROOT/scripts/test-note-editor-ownership.py"
 	"$$PYTHON" "$$ROOT/scripts/test-todo-task-input.py"
 	"$$PYTHON" "$$ROOT/scripts/test-swift-objects-image.py"
+	"$$PYTHON" "$$ROOT/scripts/test-select-ios-simulator.py"
 	@if command -v "$$SWIFTC" >/dev/null 2>&1; then \
 		SWIFTC="$$SWIFTC" "$$ROOT/scripts/test-background-selection.sh"; \
 	else \
@@ -73,7 +74,9 @@ test:
 
 native-test:
 	@if command -v "$$XCODEBUILD" >/dev/null 2>&1; then \
-		"$$XCODEBUILD" -project "$$CANARY_PROJECT" -scheme background_switcher -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' CODE_SIGNING_ALLOWED=NO test; \
+		simulator_udid=$$("$$PYTHON" "$$ROOT/scripts/select-ios-simulator.py") || exit 1; \
+		echo "using iOS simulator $$simulator_udid"; \
+		"$$XCODEBUILD" -project "$$CANARY_PROJECT" -scheme background_switcher -sdk iphonesimulator -destination "id=$$simulator_udid" CODE_SIGNING_ALLOWED=NO test; \
 	else \
 		echo "xcodebuild unavailable; skipping native background switcher tests"; \
 	fi
