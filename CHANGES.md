@@ -1,5 +1,41 @@
 # Changes
 
+## 2026-07-16T00:35:00-07:00 — P2 privacy — cycle: service error contract property
+
+### Summary
+
+The service-error privacy contract pinned exact log strings, so it rejected the
+better bounded diagnostic (`NSLog("... code=%ld", error.code)`) and would have
+had to be edited to allow an improvement it should permit. Replaced the wording
+lock with checks on the actual property: no raw `NSError` reaches the log, by
+`%@` argument or `\(error)` interpolation.
+
+### Work completed
+
+- `scripts/check-swift-samples.py` — added `RAW_NSERROR_LOG_RE` and
+  `RAW_NSERROR_INTERPOLATION_RE`; relaxed the exact-string requirements to
+  prefix requirements so bounded `code`/`domain` diagnostics pass.
+- `scripts/test-service-error-privacy.py` — added `\(error)` interpolation
+  mutations and an `ALLOWED_FORMS` section asserting bounded diagnostics are
+  accepted.
+- `docs/plans/2026-06-26-service-error-privacy.md` — recorded the follow-up.
+
+### Notes
+
+- Relaxing the wording lock removes the incidental cover it gave against
+  `\(error)` interpolation, so the interpolation regex is load-bearing.
+  Verified by neutralizing it: the leak then passes the checker.
+- The Swift log messages are unchanged here. Restoring `error.code`/`domain` is
+  now unblocked but is left to a change that can be compiled — no Swift
+  toolchain is available locally, and hosted CI builds only
+  `background_switcher`, so the sample sources are never compiled.
+
+### Verification
+
+- `scripts/test-service-error-privacy.py` — 4 mutations rejected, 2 bounded
+  diagnostics accepted.
+- `make check` exit 0; hygiene and samples checks passed.
+
 ## 2026-06-26T21:04:00-07:00 — P1 privacy — cycle: service error privacy
 
 ### Summary
